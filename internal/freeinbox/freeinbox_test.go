@@ -60,6 +60,9 @@ type vectors struct {
 func loadVectors(t *testing.T) *vectors {
 	t.Helper()
 	b, err := os.ReadFile(filepath.Join("..", "..", "..", "contracts", "free-inbox", "testvectors.json"))
+	if os.IsNotExist(err) {
+		t.Skip("no contracts/free-inbox/ directory (CLI-only checkout)")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}

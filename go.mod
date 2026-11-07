@@ -53,8 +53,8 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 )
 
-replace send.io/sendio-go => ../sdks/go
+replace send.io/sendio-go => ./third_party/sendio-go
 
 require send.io/email-renderer v0.0.0
 
-replace send.io/email-renderer => ../packages/email-renderer
+replace send.io/email-renderer => ./third_party/email-renderer
