@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>send.io templates dev</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23111'/%3E%3Cpath d='M8 11l8 6 8-6M8 11h16v11H8z' stroke='%23fff' stroke-width='2' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--fg:#17171a;--muted:#6b6b73;--line:#e4e4e0;--accent:#2f6bff;--accent-fg:#fff;--err:#d93636;--warn:#b7791f;--info:#4a6fa5;--chip:#f0f0ec;--code:#fafaf8;--frame:#e9e9e5}
+@media (prefers-color-scheme:dark){:root{--bg:#111113;--panel:#18181b;--fg:#ededef;--muted:#9a9aa3;--line:#2a2a2f;--accent:#5b8cff;--chip:#232328;--code:#141417;--frame:#0c0c0e}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:260px 1fr;height:100vh}
+aside{border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+.brand{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:600}
+.brand small{font-weight:400;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:#999;margin-left:auto}
+.dot.live{background:#2fb344}
+.search{padding:10px 12px;border-bottom:1px solid var(--line)}
+.search input{width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+nav{overflow:auto;flex:1;padding:6px}
+nav a{display:block;padding:8px 10px;border-radius:8px;color:inherit;text-decoration:none;margin-bottom:2px}
+nav a:hover{background:var(--chip)}
+nav a.active{background:var(--chip);box-shadow:inset 3px 0 0 var(--accent)}
+nav .n{font-weight:500;display:flex;gap:6px;align-items:center}
+nav .s{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;border-radius:999px;padding:0 6px;line-height:17px}
+.badge.e{background:color-mix(in srgb,var(--err) 15%,transparent);color:var(--err)}
+.badge.w{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.foot{padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;word-break:break-all}
+main{display:flex;flex-direction:column;min-width:0;min-height:0}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:15px;margin:0;font-weight:600;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:5px 10px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--chip);font-weight:600}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.meta{padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:13px}
+.meta dt{color:var(--muted)}
+.meta dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.body{display:grid;grid-template-columns:1fr 340px;flex:1;min-height:0}
+.stage{min-height:0;overflow:auto;background:var(--frame);display:flex;flex-direction:column;align-items:center;padding:20px}
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:8px;cursor:pointer;color:var(--muted)}
+.tabs button[aria-selected=true]{background:var(--panel);color:var(--fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.device{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.12);overflow:hidden;transition:width .2s;max-width:100%}
+.device iframe{border:0;width:100%;display:block;background:#fff;min-height:400px}
+pre.text{background:var(--panel);border-radius:10px;padding:18px;white-space:pre-wrap;word-break:break-word;margin:0;width:min(720px,100%);font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.side{border-left:1px solid var(--line);background:var(--panel);overflow:auto;min-height:0}
+.side section{padding:14px 16px;border-bottom:1px solid var(--line)}
+.side h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.warn{display:flex;gap:8px;padding:6px 0;font-size:13px;align-items:flex-start}
+.warn i{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px}
+.warn.error i{background:var(--err)}.warn.warning i{background:var(--warn)}.warn.info i{background:var(--info)}
+.ok{color:var(--muted);font-size:13px}
+textarea{width:100%;min-height:220px;border:1px solid var(--line);border-radius:8px;background:var(--code);padding:10px;font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+.row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.hint{color:var(--muted);font-size:12px}
+.err-text{color:var(--err);font-size:12px}
+.empty{margin:auto;color:var(--muted);text-align:center;padding:40px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--fg);width:min(440px,92vw);padding:20px}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+dialog h3{margin:0 0 6px}
+dialog label{display:block;font-size:13px;margin:12px 0 4px;color:var(--muted)}
+dialog input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.radio{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+@media (max-width:900px){.app{grid-template-columns:1fr}aside{display:none}.body{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">send.io <small>templates dev</small><span class="dot" id="live" title="Hot reload"></span></div>
+    <div class="search"><input id="filter" placeholder="Filter templates" aria-label="Filter templates"></div>
+    <nav id="list"></nav>
+    <div class="foot" id="dir"></div>
+  </aside>
+  <main>
+    <header>
+      <h1 id="title">Templates</h1>
+      <div class="seg" role="group" aria-label="Width">
+        <button id="w-desktop" aria-pressed="true">Desktop</button>
+        <button id="w-mobile" aria-pressed="false">Mobile</button>
+      </div>
+      <div class="seg" role="group" aria-label="Color scheme">
+        <button id="m-light" aria-pressed="true">Light</button>
+        <button id="m-dark" aria-pressed="false">Dark</button>
+      </div>
+      <button class="btn primary" id="send-btn" disabled>Send test</button>
+    </header>
+    <dl class="meta" id="meta" hidden>
+      <dt>Subject</dt><dd id="m-subject"></dd>
+      <dt>From</dt><dd id="m-from"></dd>
+      <dt>Engine</dt><dd id="m-engine"></dd>
+    </dl>
+    <div class="body">
+      <div class="stage">
+        <div class="tabs" role="tablist">
+          <button role="tab" id="t-html" aria-selected="true">HTML</button>
+          <button role="tab" id="t-text" aria-selected="false">Plain text</button>
+          <button role="tab" id="t-source" aria-selected="false">Source</button>
+        </div>
+        <div class="device" id="device" style="width:720px"><iframe id="frame" title="Email preview" sandbox="allow-same-origin allow-popups"></iframe></div>
+        <pre class="text" id="text" hidden></pre>
+        <div class="empty" id="empty">No template selected.</div>
+      </div>
+      <div class="side">
+        <section>
+          <h2>Checks <span id="size" class="hint"></span></h2>
+          <div id="warnings"></div>
+        </section>
+        <section>
+          <h2>Data</h2>
+          <div class="hint" id="fixture-path"></div>
+          <textarea id="data" spellcheck="false" aria-label="Preview data (JSON)"></textarea>
+          <div class="err-text" id="data-err"></div>
+          <div class="row">
+            <button class="btn" id="apply">Apply</button>
+            <button class="btn" id="save">Save to fixture</button>
+            <span class="hint">Ctrl/Cmd+Enter applies</span>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+<dialog id="send-dialog">
+  <form method="dialog" id="send-form">
+    <h3>Send a test</h3>
+    <div class="hint" id="send-sub"></div>
+    <label for="send-to">To (1 to 5, comma-separated)</label>
+    <input type="text" id="send-to" required autocomplete="email">
+    <div class="radio"><input type="radio" name="mode" value="html" id="mode-html" checked><label for="mode-html" style="margin:0;color:inherit">Send this preview (rendered here with the data above, via POST /emails)</label></div>
+    <div class="radio"><input type="radio" name="mode" value="template" id="mode-template"><label for="mode-template" style="margin:0;color:inherit">Send the template saved on send.io (its test send, with the data above as variables)</label></div>
+    <label for="send-from">From (for "this preview")</label>
+    <input type="text" id="send-from" placeholder="Name &lt;you@your-verified-domain&gt;">
+    <div class="err-text" id="send-err"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:16px">
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn primary" id="send-confirm" value="send">Send</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const H = {"Content-Type": "application/json", "X-Sendio-Dev": "1"};
+  const st = {list: [], key: null, view: null, width: "desktop", dark: false, tab: "html", canSend: false, dirty: false};
+  try { const s = JSON.parse(localStorage.getItem("sendio-dev") || "{}"); Object.assign(st, {width: s.width || "desktop", dark: !!s.dark, tab: s.tab || "html"}); } catch (e) {}
+  const save = () => { try { localStorage.setItem("sendio-dev", JSON.stringify({width: st.width, dark: st.dark, tab: st.tab})); } catch (e) {} };
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+  const toast = (m) => { const t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2200); };
+  async function api(path, opts) {
+    const r = await fetch(path, opts);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.error || r.statusText);
+    return j;
+  }
+  function renderList() {
+    const q = $("filter").value.toLowerCase();
+    $("list").innerHTML = st.list.filter((t) => !q || (t.key + " " + t.name + " " + (t.subject || "")).toLowerCase().includes(q)).map((t) =>
+      `<a href="#${encodeURIComponent(t.key)}" class="${t.key === st.key ? "active" : ""}"><div class="n">${esc(t.name)}${t.errors ? `<span class="badge e">${t.errors}</span>` : ""}${t.warnings ? `<span class="badge w">${t.warnings}</span>` : ""}</div><div class="s">${esc(t.alias || t.key)} · ${esc(t.subject || "no subject")}</div></a>`).join("") || `<div class="empty">No template folders (with meta.json) here.</div>`;
+  }
+  async function loadList() {
+    const j = await api("/api/templates");
+    st.list = j.templates; st.canSend = j.can_send;
+    $("dir").textContent = j.dir;
+    renderList();
+    if (!st.key && st.list.length) select(decodeURIComponent(location.hash.slice(1)) || st.list[0].key);
+  }
+  function applyFrame() {
+    const v = st.view; if (!v) return;
+    const html = st.dark ? v.html_dark : v.result.html;
+    const fr = $("frame");
+    const y = fr.contentWindow ? fr.contentWindow.scrollY : 0;
+    fr.srcdoc = html || "<p style='font:14px sans-serif;color:#888;padding:20px'>No HTML part.</p>";
+    fr.onload = () => { try { fr.style.height = Math.max(400, fr.contentDocument.documentElement.scrollHeight) + "px"; fr.contentWindow.scrollTo(0, y); } catch (e) {} };
+    $("device").style.width = st.width === "mobile" ? "375px" : "720px";
+  }
+  function showTab() {
+    const v = st.view;
+    for (const t of ["html", "text", "source"]) $("t-" + t).setAttribute("aria-selected", String(st.tab === t));
+    $("device").hidden = st.tab !== "html" || !v;
+    $("text").hidden = st.tab === "html" || !v;
+    $("empty").hidden = !!v;
+    if (!v) return;
+    if (st.tab === "text") $("text").textContent = v.result.text || "(no plain-text part: add template.txt)";
+    if (st.tab === "source") $("text").textContent = v.result.html;
+  }
+  function showView() {
+    const v = st.view, r = v.result;
+    $("title").textContent = v.template.meta.name;
+    $("meta").hidden = false;
+    $("m-subject").textContent = r.subject || "(empty)";
+    $("m-from").textContent = r.from || "(not set in meta.json)";
+    $("m-engine").textContent = r.engine;
+    $("size").textContent = (r.html_bytes / 1024).toFixed(1) + " KB";
+    const ws = r.warnings || [];
+    $("warnings").innerHTML = ws.length ? ws.map((w) => `<div class="warn ${w.level}"><i></i><div>${esc(w.message)}</div></div>`).join("") : `<div class="ok">No problems found.</div>`;
+    $("fixture-path").textContent = (v.fixture_exists ? "" : "(not saved yet) ") + v.fixture;
+    if (!st.dirty) $("data").value = JSON.stringify(v.data, null, 2);
+    $("send-btn").disabled = !st.canSend;
+    $("send-btn").title = st.canSend ? "" : "Sign in (sendio login) and restart to send tests";
+    applyFrame(); showTab();
+  }
+  async function select(key) {
+    if (!st.list.some((t) => t.key === key)) key = st.list[0] && st.list[0].key;
+    if (!key) return;
+    if (st.key !== key) st.dirty = false;
+    st.key = key; renderList();
+    if (location.hash.slice(1) !== encodeURIComponent(key)) history.replaceState(null, "", "#" + encodeURIComponent(key));
+    if (st.dirty) return applyData();
+    st.view = await api("/api/templates/" + encodeURIComponent(key));
+    showView();
+  }
+  function parseData() {
+    $("data-err").textContent = "";
+    try { const d = JSON.parse($("data").value || "{}"); if (!d || typeof d !== "object" || Array.isArray(d)) throw new Error("must be a JSON object"); return d; }
+    catch (e) { $("data-err").textContent = "Data: " + e.message; return null; }
+  }
+  async function applyData() {
+    const d = parseData(); if (!d) return;
+    st.view = await api("/api/render/" + encodeURIComponent(st.key), {method: "POST", headers: H, body: JSON.stringify({data: d})});
+    showView();
+  }
+  $("data").addEventListener("input", () => { st.dirty = true; });
+  $("data").addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); applyData(); } });
+  $("apply").onclick = applyData;
+  $("save").onclick = async () => {
+    const d = parseData(); if (!d) return;
+    st.view = await api("/api/fixtures/" + encodeURIComponent(st.key), {method: "PUT", headers: H, body: JSON.stringify({data: d})});
+    st.dirty = false; showView(); toast("Saved " + st.view.fixture);
+  };
+  $("filter").oninput = renderList;
+  window.addEventListener("hashchange", () => select(decodeURIComponent(location.hash.slice(1))));
+  const seg = () => {
+    $("w-desktop").setAttribute("aria-pressed", String(st.width === "desktop")); $("w-mobile").setAttribute("aria-pressed", String(st.width === "mobile"));
+    $("m-light").setAttribute("aria-pressed", String(!st.dark)); $("m-dark").setAttribute("aria-pressed", String(st.dark));
+  };
+  $("w-desktop").onclick = () => { st.width = "desktop"; save(); seg(); applyFrame(); };
+  $("w-mobile").onclick = () => { st.width = "mobile"; save(); seg(); applyFrame(); };
+  $("m-light").onclick = () => { st.dark = false; save(); seg(); applyFrame(); };
+  $("m-dark").onclick = () => { st.dark = true; save(); seg(); applyFrame(); };
+  for (const t of ["html", "text", "source"]) $("t-" + t).onclick = () => { st.tab = t; save(); showTab(); };
+  $("send-btn").onclick = () => {
+    const v = st.view; if (!v) return;
+    $("send-err").textContent = "";
+    $("send-sub").textContent = v.template.meta.name + (v.template.meta.id ? "" : " (not on send.io yet: only the preview can be sent)");
+    $("mode-template").disabled = !(v.template.meta.id || v.template.meta.alias);
+    if ($("mode-template").disabled) $("mode-html").checked = true;
+    $("send-from").value = $("send-from").value || v.result.from || "";
+    try { $("send-to").value = $("send-to").value || localStorage.getItem("sendio-dev-to") || ""; } catch (e) {}
+    $("send-dialog").showModal();
+  };
+  $("send-form").addEventListener("submit", async (e) => {
+    if (e.submitter && e.submitter.value === "cancel") return;
+    e.preventDefault();
+    const d = parseData(); if (!d) { $("send-err").textContent = "Fix the data JSON first."; return; }
+    const mode = document.querySelector("input[name=mode]:checked").value;
+    const to = $("send-to").value.split(",").map((s) => s.trim()).filter(Boolean);
+    if (!window.confirm(`Send a real email to ${to.join(", ")}?`)) return;
+    $("send-confirm").disabled = true;
+    try {
+      const j = await api("/api/send/" + encodeURIComponent(st.key), {method: "POST", headers: H, body: JSON.stringify({mode, to, from: $("send-from").value, data: d, confirm: true})});
+      try { localStorage.setItem("sendio-dev-to", $("send-to").value); } catch (e2) {}
+      $("send-dialog").close(); toast("Sent" + (j.response && j.response.id ? " (" + j.response.id + ")" : ""));
+    } catch (err) { $("send-err").textContent = err.message; }
+    finally { $("send-confirm").disabled = false; }
+  });
+  function connect() {
+    const es = new EventSource("/api/events");
+    es.onopen = () => $("live").classList.add("live");
+    es.onerror = () => $("live").classList.remove("live");
+    es.addEventListener("change", async (ev) => {
+      const keys = JSON.parse(ev.data).keys || [];
+      await loadList();
+      if (st.key && (keys.includes("*") || keys.includes(st.key))) { await select(st.key); toast("Reloaded"); }
+    });
+  }
+  seg(); loadList().catch((e) => { $("empty").textContent = e.message; }); connect();
+})();
+</script>
+</body>
+</html>

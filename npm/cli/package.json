@@ -1,0 +1,27 @@
+{
+  "name": "@sendio/cli",
+  "version": "0.0.0-dev",
+  "description": "send.io CLI: send email, manage domains, templates, contacts and more",
+  "license": "UNLICENSED",
+  "homepage": "https://send.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/send-io/cli.git",
+    "directory": "npm/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/send-io/cli/issues"
+  },
+  "keywords": ["sendio", "send.io", "email", "cli", "transactional-email"],
+  "bin": {
+    "sendio": "bin/sendio.js"
+  },
+  "files": [
+    "bin/sendio.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "optionalDependencies": {}
+}

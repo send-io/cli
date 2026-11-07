@@ -1,0 +1,190 @@
+# GoReleaser config for the sendio CLI (send.io).
+# Source: https://gitlab.com/foomonk/sendio/send-io-core (cli/).
+#
+#   goreleaser check
+#   goreleaser release --snapshot --clean            # local, nothing published
+#   goreleaser release --clean                       # CI, on a vX.Y.Z tag
+#
+# Run from cli/. Placeholders to fill in before the first real release:
+#   - GitHub owner/repo for releases (send-io/cli), Homebrew tap
+#     (send-io/homebrew-tap) and Scoop bucket (send-io/scoop-bucket)
+#   - ghcr.io/send-io/cli image name
+#   - license (no LICENSE file in the repo yet, so packages say "Proprietary")
+#   - signing / notarization credentials (sections commented out below)
+#
+# Env used by a real release: GITHUB_TOKEN (release + ghcr),
+# HOMEBREW_TAP_GITHUB_TOKEN, SCOOP_BUCKET_GITHUB_TOKEN.
+version: 2
+
+project_name: sendio
+
+# The repo holds more than the CLI and has non-semver tags; a real release
+# should be cut from a vX.Y.Z tag (export GORELEASER_CURRENT_TAG=vX.Y.Z if
+# another tag points at the same commit).
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - id: sendio
+    main: ./cmd/sendio
+    binary: sendio
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X send.io/cli/internal/build.Version={{ .Version }}
+      - -X send.io/cli/internal/build.Commit={{ .ShortCommit }}
+      - -X send.io/cli/internal/build.Date={{ .Date }}
+      # Point the in-CLI update check at the repo releases are published to.
+      - -X send.io/cli/internal/build.UpdateRepo=send-io/cli
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: sendio
+    ids: [sendio]
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "sendio_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    # Default `files` already picks up README*, LICENSE*, CHANGELOG* when
+    # present (and silently skips missing ones).
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: git
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "Merge branch"
+
+# Homebrew: casks are the non-deprecated GoReleaser v2 way to ship binaries.
+homebrew_casks:
+  - name: sendio
+    binaries: [sendio]
+    homepage: https://send.io
+    description: "send.io CLI: send email, manage domains, templates, contacts and more"
+    license: Proprietary # TODO: real license
+    commit_author:
+      name: sendio-bot
+      email: support@send.io
+    repository:
+      owner: send-io # TODO: placeholder
+      name: homebrew-tap # TODO: placeholder
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    # Until the macOS binaries are signed + notarized, strip the quarantine
+    # attribute so Gatekeeper does not block the first run.
+    hooks:
+      post:
+        install_steps: |
+          run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/sendio"]
+
+scoops:
+  - name: sendio
+    homepage: https://send.io
+    description: "send.io CLI: send email, manage domains, templates, contacts and more"
+    license: Proprietary # TODO: real license
+    commit_author:
+      name: sendio-bot
+      email: support@send.io
+    repository:
+      owner: send-io # TODO: placeholder
+      name: scoop-bucket # TODO: placeholder
+      token: "{{ .Env.SCOOP_BUCKET_GITHUB_TOKEN }}"
+
+nfpms:
+  - id: sendio
+    ids: [sendio]
+    package_name: sendio
+    file_name_template: "{{ .ConventionalFileName }}"
+    vendor: send.io
+    maintainer: "send.io <support@send.io>"
+    homepage: https://send.io
+    description: "send.io CLI: send email, manage domains, templates, contacts and more"
+    license: Proprietary # TODO: real license
+    formats: [deb, rpm]
+    bindir: /usr/bin
+    section: utils
+    priority: optional
+
+# Multi-arch image via buildx. The build context holds <os>/<arch>/sendio,
+# which Dockerfile.goreleaser copies using TARGETPLATFORM.
+dockers_v2:
+  - id: sendio
+    ids: [sendio]
+    dockerfile: Dockerfile.goreleaser
+    images:
+      - ghcr.io/send-io/cli # TODO: placeholder
+    tags:
+      - "{{ .Version }}"
+      - "{{ if not .IsSnapshot }}latest{{ end }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: sendio
+      org.opencontainers.image.description: send.io CLI
+      org.opencontainers.image.url: https://send.io
+      org.opencontainers.image.source: https://gitlab.com/foomonk/sendio/send-io-core
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.created: "{{ .Date }}"
+
+# TODO(credentials): macOS signing + notarization. Needs an Apple Developer ID
+# Application certificate (.p12, base64) and an App Store Connect API key.
+# notarize:
+#   macos:
+#     - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+#       ids: [sendio]
+#       sign:
+#         certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+#         password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+#       notarize:
+#         issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+#         key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+#         key: "{{ .Env.MACOS_NOTARY_KEY }}"
+#         wait: true
+
+# TODO(credentials): cosign keyless signing of checksums.txt (needs
+# id-token: write in the GitHub Actions job) and of the docker images.
+# signs:
+#   - cmd: cosign
+#     artifacts: checksum
+#     signature: "${artifact}.sig"
+#     certificate: "${artifact}.pem"
+#     args:
+#       - sign-blob
+#       - "--output-certificate=${certificate}"
+#       - "--output-signature=${signature}"
+#       - "${artifact}"
+#       - "--yes"
+# docker_signs:
+#   - cmd: cosign
+#     artifacts: manifests
+#     args: ["sign", "${artifact}", "--yes"]
+
+release:
+  github:
+    owner: send-io # TODO: placeholder
+    name: cli # TODO: placeholder
+  draft: true
+  prerelease: auto
+  name_template: "sendio {{ .Version }}"
+  footer: |
+    Install: `curl -fsSL https://app.send.io/install.sh | sh` (or `brew install --cask send-io/tap/sendio`,
+    `scoop install sendio`, `npm i -g @sendio/cli`).

@@ -1,0 +1,3 @@
+dist/
+# The repo root ignores bin/; the npm shim lives in one.
+!npm/cli/bin/

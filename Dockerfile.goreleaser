@@ -1,0 +1,6 @@
+# Used by GoReleaser (dockers_v2). The build context contains
+# linux/amd64/sendio and linux/arm64/sendio; buildx sets TARGETPLATFORM.
+FROM gcr.io/distroless/static-debian12:nonroot
+ARG TARGETPLATFORM
+COPY $TARGETPLATFORM/sendio /usr/local/bin/sendio
+ENTRYPOINT ["/usr/local/bin/sendio"]

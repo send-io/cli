@@ -1,0 +1,7003 @@
+[
+  {
+    "name": "send-email",
+    "description": "Send an email (inline html/text, or a published template with its variables).",
+    "method": "POST",
+    "path": "/emails",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "attachments",
+        "type": "array",
+        "items": "object",
+        "description": "Attachments, [{filename, content (base64) | path, content_type?}]."
+      },
+      {
+        "name": "bcc",
+        "type": "array",
+        "items": "string",
+        "description": "Bcc addresses."
+      },
+      {
+        "name": "cc",
+        "type": "array",
+        "items": "string",
+        "description": "Cc addresses."
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address."
+      },
+      {
+        "name": "headers",
+        "type": "object",
+        "description": "Custom headers, {name: value}."
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "string",
+        "description": "Idempotency-Key header: a retry with the same key sends once."
+      },
+      {
+        "name": "replyTo",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses."
+      },
+      {
+        "name": "scheduledAt",
+        "type": "string",
+        "description": "ISO 8601 time or relative time (in 30 minutes, in 2 hours, in 3 days) to send later, within 30 days."
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "tags",
+        "type": "array",
+        "items": "object",
+        "description": "Tags, [{name, value}]."
+      },
+      {
+        "name": "template",
+        "type": "object",
+        "description": "Send a published template: {id (id or alias), variables?}."
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "description": "Recipient addresses (1 to 50 with cc and bcc).",
+        "required": true
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Topic the email belongs to (unsubscribed contacts are skipped)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "attachments": {
+          "description": "Attachments, [{filename, content (base64) | path, content_type?}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "bcc": {
+          "description": "Bcc addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cc": {
+          "description": "Cc addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "from": {
+          "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address.",
+          "type": "string"
+        },
+        "headers": {
+          "description": "Custom headers, {name: value}.",
+          "type": "object"
+        },
+        "html": {
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "description": "Idempotency-Key header: a retry with the same key sends once.",
+          "type": "string"
+        },
+        "replyTo": {
+          "description": "Reply-To addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scheduledAt": {
+          "description": "ISO 8601 time or relative time (in 30 minutes, in 2 hours, in 3 days) to send later, within 30 days.",
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "tags": {
+          "description": "Tags, [{name, value}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "template": {
+          "description": "Send a published template: {id (id or alias), variables?}.",
+          "type": "object"
+        },
+        "text": {
+          "type": "string"
+        },
+        "to": {
+          "description": "Recipient addresses (1 to 50 with cc and bcc).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "topic_id": {
+          "description": "Topic the email belongs to (unsubscribed contacts are skipped).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-batch-emails",
+    "description": "Send up to 100 emails in one call.",
+    "method": "POST",
+    "path": "/emails/batch",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "emails",
+        "type": "array",
+        "items": "object",
+        "description": "Emails, each shaped like send-email's body (snake_case: reply_to, scheduled_at).",
+        "required": true
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "string",
+        "description": "Idempotency-Key header."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "emails": {
+          "description": "Emails, each shaped like send-email's body (snake_case: reply_to, scheduled_at).",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "idempotencyKey": {
+          "description": "Idempotency-Key header.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "emails"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-emails",
+    "description": "List sent emails, newest first.",
+    "method": "GET",
+    "path": "/emails",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-email",
+    "description": "Get a sent email with its status and content.",
+    "method": "GET",
+    "path": "/emails/{id}",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-email",
+    "description": "Reschedule a scheduled email.",
+    "method": "PATCH",
+    "path": "/emails/{id}",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      },
+      {
+        "name": "scheduledAt",
+        "type": "string",
+        "description": "New send time (ISO 8601).",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        },
+        "scheduledAt": {
+          "description": "New send time (ISO 8601).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "scheduledAt"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "cancel-email",
+    "description": "Cancel a scheduled email before it is sent.",
+    "method": "POST",
+    "path": "/emails/{id}/cancel",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-email-events",
+    "description": "List the delivery timeline of a sent email (sent, delivered, bounced, ...).",
+    "method": "GET",
+    "path": "/emails/{id}/events",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-email-attachments",
+    "description": "List the attachments of a sent email, with download URLs.",
+    "method": "GET",
+    "path": "/emails/{id}/attachments",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-email-attachment",
+    "description": "Get one attachment of a sent email, with its download URL.",
+    "method": "GET",
+    "path": "/emails/{id}/attachments/{attachment}",
+    "family": "Emails",
+    "params": [
+      {
+        "name": "attachment",
+        "type": "string",
+        "description": "The attachment id.",
+        "required": true
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment": {
+          "description": "The attachment id.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "attachment"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-received-emails",
+    "description": "List emails received on your domains, newest first.",
+    "method": "GET",
+    "path": "/emails/receiving",
+    "family": "Received emails",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-received-email",
+    "description": "Get a received email with its headers, html and text.",
+    "method": "GET",
+    "path": "/emails/receiving/{id}",
+    "family": "Received emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The received email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The received email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-received-email-attachments",
+    "description": "List the attachments of a received email, with download URLs.",
+    "method": "GET",
+    "path": "/emails/receiving/{id}/attachments",
+    "family": "Received emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The received email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The received email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-received-email-attachment",
+    "description": "Get one attachment of a received email, with its download URL.",
+    "method": "GET",
+    "path": "/emails/receiving/{id}/attachments/{attachment}",
+    "family": "Received emails",
+    "params": [
+      {
+        "name": "attachment",
+        "type": "string",
+        "description": "The attachment id.",
+        "required": true
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The received email id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment": {
+          "description": "The attachment id.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The received email id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "attachment"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-template",
+    "description": "Create a template (saved as a draft until published).",
+    "method": "POST",
+    "path": "/templates",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "alias",
+        "type": "string",
+        "description": "Unique alias usable in place of the id."
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Default sender for sends that use the template."
+      },
+      {
+        "name": "html",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "preview_text",
+        "type": "string"
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Default Reply-To addresses."
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "template_engine",
+        "type": "string",
+        "enum": [
+          "simple",
+          "handlebars"
+        ],
+        "description": "Template syntax."
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "variables",
+        "type": "array",
+        "items": "object",
+        "description": "Variables, [{key, type: string|number (handlebars also boolean|object|array), fallback_value?}]."
+      },
+      {
+        "name": "version_comment",
+        "type": "string",
+        "description": "Comment for this saved version."
+      },
+      {
+        "name": "version_name",
+        "type": "string",
+        "description": "Label for this saved version."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "description": "Unique alias usable in place of the id.",
+          "type": "string"
+        },
+        "from": {
+          "description": "Default sender for sends that use the template.",
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "preview_text": {
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Default Reply-To addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "template_engine": {
+          "description": "Template syntax.",
+          "enum": [
+            "simple",
+            "handlebars"
+          ],
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "variables": {
+          "description": "Variables, [{key, type: string|number (handlebars also boolean|object|array), fallback_value?}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "version_comment": {
+          "description": "Comment for this saved version.",
+          "type": "string"
+        },
+        "version_name": {
+          "description": "Label for this saved version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "html"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-templates",
+    "description": "List templates.",
+    "method": "GET",
+    "path": "/templates",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-template",
+    "description": "Get a template with its current content and variables.",
+    "method": "GET",
+    "path": "/templates/{id}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-template",
+    "description": "Update a template; each save becomes a new draft version.",
+    "method": "PATCH",
+    "path": "/templates/{id}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "alias",
+        "type": "string",
+        "description": "Unique alias usable in place of the id."
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Default sender for sends that use the template."
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "preview_text",
+        "type": "string"
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Default Reply-To addresses."
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "template_engine",
+        "type": "string",
+        "enum": [
+          "simple",
+          "handlebars"
+        ],
+        "description": "Template syntax."
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "variables",
+        "type": "array",
+        "items": "object",
+        "description": "Variables, [{key, type: string|number (handlebars also boolean|object|array), fallback_value?}]."
+      },
+      {
+        "name": "version_comment",
+        "type": "string",
+        "description": "Comment for this saved version."
+      },
+      {
+        "name": "version_name",
+        "type": "string",
+        "description": "Label for this saved version."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "alias": {
+          "description": "Unique alias usable in place of the id.",
+          "type": "string"
+        },
+        "from": {
+          "description": "Default sender for sends that use the template.",
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "preview_text": {
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Default Reply-To addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "template_engine": {
+          "description": "Template syntax.",
+          "enum": [
+            "simple",
+            "handlebars"
+          ],
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "variables": {
+          "description": "Variables, [{key, type: string|number (handlebars also boolean|object|array), fallback_value?}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "version_comment": {
+          "description": "Comment for this saved version.",
+          "type": "string"
+        },
+        "version_name": {
+          "description": "Label for this saved version.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "publish-template",
+    "description": "Publish a template's draft so sends use it.",
+    "method": "POST",
+    "path": "/templates/{id}/publish",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "duplicate-template",
+    "description": "Copy a template as a new draft template.",
+    "method": "POST",
+    "path": "/templates/{id}/duplicate",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-template",
+    "description": "Delete a template.",
+    "method": "DELETE",
+    "path": "/templates/{id}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "render-template",
+    "description": "Render a template with variables, without sending.",
+    "method": "POST",
+    "path": "/templates/{id}/render",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "template_engine",
+        "type": "string",
+        "enum": [
+          "simple",
+          "handlebars"
+        ],
+        "description": "Preview under this engine."
+      },
+      {
+        "name": "variables",
+        "type": "object",
+        "description": "Variable values, {key: value}."
+      },
+      {
+        "name": "version_id",
+        "type": "string",
+        "description": "Version id or number (default: published, else draft)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "template_engine": {
+          "description": "Preview under this engine.",
+          "enum": [
+            "simple",
+            "handlebars"
+          ],
+          "type": "string"
+        },
+        "variables": {
+          "description": "Variable values, {key: value}.",
+          "type": "object"
+        },
+        "version_id": {
+          "description": "Version id or number (default: published, else draft).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-test-template",
+    "description": "Send a test of a template to 1 to 5 addresses.",
+    "method": "POST",
+    "path": "/templates/{id}/test",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "description": "1 to 5 recipient addresses.",
+        "required": true
+      },
+      {
+        "name": "variables",
+        "type": "object",
+        "description": "Variable values, {key: value}."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "to": {
+          "description": "1 to 5 recipient addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "variables": {
+          "description": "Variable values, {key: value}.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-template-versions",
+    "description": "List a template's saved versions, newest first.",
+    "method": "GET",
+    "path": "/templates/{id}/versions",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-template-version",
+    "description": "Get one saved version of a template.",
+    "method": "GET",
+    "path": "/templates/{id}/versions/{version}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-template-version",
+    "description": "Rename or comment a saved template version.",
+    "method": "PATCH",
+    "path": "/templates/{id}/versions/{version}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "comment",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-template-version",
+    "description": "Hide a saved template version (not the published one).",
+    "method": "DELETE",
+    "path": "/templates/{id}/versions/{version}",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "activate-template-version",
+    "description": "Make a saved version the template's published version.",
+    "method": "POST",
+    "path": "/templates/{id}/versions/{version}/activate",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-contact",
+    "description": "Create a contact (one per email address).",
+    "method": "POST",
+    "path": "/contacts",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "create_missing_properties",
+        "type": "boolean",
+        "description": "Create property keys that do not exist yet (type inferred)."
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "first_name",
+        "type": "string"
+      },
+      {
+        "name": "last_name",
+        "type": "string"
+      },
+      {
+        "name": "properties",
+        "type": "object",
+        "description": "Contact property values, {key: value}; define keys with create-contact-property or set create_missing_properties."
+      },
+      {
+        "name": "segments",
+        "type": "array",
+        "items": "object",
+        "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}]."
+      },
+      {
+        "name": "topics",
+        "type": "array",
+        "items": "object",
+        "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}]."
+      },
+      {
+        "name": "unsubscribed",
+        "type": "boolean",
+        "description": "Unsubscribed from all marketing email."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "create_missing_properties": {
+          "description": "Create property keys that do not exist yet (type inferred).",
+          "type": "boolean"
+        },
+        "email": {
+          "type": "string"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "properties": {
+          "description": "Contact property values, {key: value}; define keys with create-contact-property or set create_missing_properties.",
+          "type": "object"
+        },
+        "segments": {
+          "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "topics": {
+          "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "unsubscribed": {
+          "description": "Unsubscribed from all marketing email.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-contacts",
+    "description": "List contacts, optionally filtered by search, status, segment or topic.",
+    "method": "GET",
+    "path": "/contacts",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches email or name."
+      },
+      {
+        "name": "segment_id",
+        "type": "string",
+        "description": "Only members of this segment."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "subscribed",
+          "unsubscribed"
+        ],
+        "description": "Subscription status."
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Only contacts opted in to this topic."
+      },
+      {
+        "name": "verification_status",
+        "type": "string",
+        "enum": [
+          "pending",
+          "valid",
+          "invalid",
+          "risky",
+          "unknown",
+          "none"
+        ],
+        "description": "Email verification result (none: never verified)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches email or name.",
+          "type": "string"
+        },
+        "segment_id": {
+          "description": "Only members of this segment.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Subscription status.",
+          "enum": [
+            "subscribed",
+            "unsubscribed"
+          ],
+          "type": "string"
+        },
+        "topic_id": {
+          "description": "Only contacts opted in to this topic.",
+          "type": "string"
+        },
+        "verification_status": {
+          "description": "Email verification result (none: never verified).",
+          "enum": [
+            "pending",
+            "valid",
+            "invalid",
+            "risky",
+            "unknown",
+            "none"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-contact",
+    "description": "Get a contact with its properties.",
+    "method": "GET",
+    "path": "/contacts/{id}",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-contact",
+    "description": "Update a contact's name, subscription or properties (null clears a property).",
+    "method": "PATCH",
+    "path": "/contacts/{id}",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "create_missing_properties",
+        "type": "boolean",
+        "description": "Create property keys that do not exist yet (type inferred)."
+      },
+      {
+        "name": "first_name",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      },
+      {
+        "name": "last_name",
+        "type": "string"
+      },
+      {
+        "name": "properties",
+        "type": "object",
+        "description": "Contact property values, {key: value}; define keys with create-contact-property or set create_missing_properties."
+      },
+      {
+        "name": "unsubscribed",
+        "type": "boolean",
+        "description": "Unsubscribed from all marketing email."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "create_missing_properties": {
+          "description": "Create property keys that do not exist yet (type inferred).",
+          "type": "boolean"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "properties": {
+          "description": "Contact property values, {key: value}; define keys with create-contact-property or set create_missing_properties.",
+          "type": "object"
+        },
+        "unsubscribed": {
+          "description": "Unsubscribed from all marketing email.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-contact",
+    "description": "Delete a contact.",
+    "method": "DELETE",
+    "path": "/contacts/{id}",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-contact-segments",
+    "description": "List the segments a contact belongs to.",
+    "method": "GET",
+    "path": "/contacts/{id}/segments",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "add-contact-to-segment",
+    "description": "Add a contact to a segment.",
+    "method": "POST",
+    "path": "/contacts/{id}/segments/{segment}",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      },
+      {
+        "name": "segment",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        },
+        "segment": {
+          "description": "The segment id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "segment"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-contact-from-segment",
+    "description": "Remove a contact from a segment.",
+    "method": "DELETE",
+    "path": "/contacts/{id}/segments/{segment}",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      },
+      {
+        "name": "segment",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        },
+        "segment": {
+          "description": "The segment id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "segment"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-contact-topics",
+    "description": "List a contact's topic subscriptions.",
+    "method": "GET",
+    "path": "/contacts/{id}/topics",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-contact-topics",
+    "description": "Opt a contact in or out of topics.",
+    "method": "PATCH",
+    "path": "/contacts/{id}/topics",
+    "family": "Contacts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact id or email address.",
+        "required": true
+      },
+      {
+        "name": "topics",
+        "type": "array",
+        "items": "object",
+        "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}].",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact id or email address.",
+          "type": "string"
+        },
+        "topics": {
+          "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "topics"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-contact-import",
+    "description": "Import contacts from CSV text (or create an import that takes its file at an upload URL).",
+    "method": "POST",
+    "path": "/contacts/imports",
+    "family": "Contact imports",
+    "upload": "csv",
+    "params": [
+      {
+        "name": "column_map",
+        "type": "object",
+        "description": "Which column holds each field: {email, first_name?, last_name?, unsubscribed?, properties?: {key: {column, type?}}}; header names, or zero-based positions."
+      },
+      {
+        "name": "create_missing_properties",
+        "type": "boolean",
+        "description": "Create property keys that do not exist yet (type inferred)."
+      },
+      {
+        "name": "csv",
+        "type": "string",
+        "description": "The CSV file's text (sent as the uploaded file)."
+      },
+      {
+        "name": "delimiter",
+        "type": "string",
+        "enum": [
+          ",",
+          ";",
+          "|",
+          "tab"
+        ],
+        "description": "Column delimiter (default: guessed)."
+      },
+      {
+        "name": "has_header",
+        "type": "boolean",
+        "description": "The first row is a header (default true)."
+      },
+      {
+        "name": "on_conflict",
+        "type": "string",
+        "enum": [
+          "upsert",
+          "skip"
+        ],
+        "description": "Existing contacts: update them (upsert, default) or leave them (skip)."
+      },
+      {
+        "name": "segments",
+        "type": "array",
+        "items": "object",
+        "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}]."
+      },
+      {
+        "name": "source",
+        "type": "string"
+      },
+      {
+        "name": "start",
+        "type": "boolean",
+        "description": "Queue now (default true); false stages it for start-contact-import."
+      },
+      {
+        "name": "topics",
+        "type": "array",
+        "items": "object",
+        "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}]."
+      },
+      {
+        "name": "unsubscribed",
+        "type": "boolean",
+        "description": "Set every imported contact's subscription state."
+      },
+      {
+        "name": "upload",
+        "type": "string",
+        "enum": [
+          "url"
+        ],
+        "description": "\"url\": no file now; the result's upload_url takes the CSV by HTTP PUT."
+      },
+      {
+        "name": "verify",
+        "type": "boolean",
+        "description": "Verify the imported email addresses (default true; each address checked costs credits, see get-pricing)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "column_map": {
+          "description": "Which column holds each field: {email, first_name?, last_name?, unsubscribed?, properties?: {key: {column, type?}}}; header names, or zero-based positions.",
+          "type": "object"
+        },
+        "create_missing_properties": {
+          "description": "Create property keys that do not exist yet (type inferred).",
+          "type": "boolean"
+        },
+        "csv": {
+          "description": "The CSV file's text (sent as the uploaded file).",
+          "type": "string"
+        },
+        "delimiter": {
+          "description": "Column delimiter (default: guessed).",
+          "enum": [
+            ",",
+            ";",
+            "|",
+            "tab"
+          ],
+          "type": "string"
+        },
+        "has_header": {
+          "description": "The first row is a header (default true).",
+          "type": "boolean"
+        },
+        "on_conflict": {
+          "description": "Existing contacts: update them (upsert, default) or leave them (skip).",
+          "enum": [
+            "upsert",
+            "skip"
+          ],
+          "type": "string"
+        },
+        "segments": {
+          "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "source": {
+          "type": "string"
+        },
+        "start": {
+          "description": "Queue now (default true); false stages it for start-contact-import.",
+          "type": "boolean"
+        },
+        "topics": {
+          "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "unsubscribed": {
+          "description": "Set every imported contact's subscription state.",
+          "type": "boolean"
+        },
+        "upload": {
+          "description": "\"url\": no file now; the result's upload_url takes the CSV by HTTP PUT.",
+          "enum": [
+            "url"
+          ],
+          "type": "string"
+        },
+        "verify": {
+          "description": "Verify the imported email addresses (default true; each address checked costs credits, see get-pricing).",
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-contact-imports",
+    "description": "List contact imports, newest first.",
+    "method": "GET",
+    "path": "/contacts/imports",
+    "family": "Contact imports",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "staged",
+          "queued",
+          "in_progress",
+          "completed",
+          "failed"
+        ],
+        "description": "Only imports in this state."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "description": "Only imports in this state.",
+          "enum": [
+            "staged",
+            "queued",
+            "in_progress",
+            "completed",
+            "failed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-contact-import",
+    "description": "Get a contact import's status and counts.",
+    "method": "GET",
+    "path": "/contacts/imports/{id}",
+    "family": "Contact imports",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact import id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact import id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "start-contact-import",
+    "description": "Start a staged contact import, optionally setting its column map and options.",
+    "method": "POST",
+    "path": "/contacts/imports/{id}/start",
+    "family": "Contact imports",
+    "params": [
+      {
+        "name": "column_map",
+        "type": "object",
+        "description": "Which column holds each field: {email, first_name?, last_name?, unsubscribed?, properties?: {key: {column, type?}}}; header names, or zero-based positions."
+      },
+      {
+        "name": "create_missing_properties",
+        "type": "boolean",
+        "description": "Create property keys that do not exist yet (type inferred)."
+      },
+      {
+        "name": "has_header",
+        "type": "boolean",
+        "description": "The first row is a header (default true)."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact import id.",
+        "required": true
+      },
+      {
+        "name": "on_conflict",
+        "type": "string",
+        "enum": [
+          "upsert",
+          "skip"
+        ],
+        "description": "Existing contacts: update them (upsert, default) or leave them (skip)."
+      },
+      {
+        "name": "segments",
+        "type": "array",
+        "items": "object",
+        "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}]."
+      },
+      {
+        "name": "topics",
+        "type": "array",
+        "items": "object",
+        "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}]."
+      },
+      {
+        "name": "unsubscribed",
+        "type": "boolean",
+        "description": "Set every imported contact's subscription state."
+      },
+      {
+        "name": "verify",
+        "type": "boolean",
+        "description": "Verify the imported email addresses (default true; each address checked costs credits, see get-pricing)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "column_map": {
+          "description": "Which column holds each field: {email, first_name?, last_name?, unsubscribed?, properties?: {key: {column, type?}}}; header names, or zero-based positions.",
+          "type": "object"
+        },
+        "create_missing_properties": {
+          "description": "Create property keys that do not exist yet (type inferred).",
+          "type": "boolean"
+        },
+        "has_header": {
+          "description": "The first row is a header (default true).",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "The contact import id.",
+          "type": "string"
+        },
+        "on_conflict": {
+          "description": "Existing contacts: update them (upsert, default) or leave them (skip).",
+          "enum": [
+            "upsert",
+            "skip"
+          ],
+          "type": "string"
+        },
+        "segments": {
+          "description": "Segments to join, [{id, status?: subscribed|unsubscribed|cleaned|pending}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "topics": {
+          "description": "Topic subscriptions, [{id, subscription: opt_in|opt_out}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "unsubscribed": {
+          "description": "Set every imported contact's subscription state.",
+          "type": "boolean"
+        },
+        "verify": {
+          "description": "Verify the imported email addresses (default true; each address checked costs credits, see get-pricing).",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-contact-property",
+    "description": "Define a custom contact property.",
+    "method": "POST",
+    "path": "/contact-properties",
+    "family": "Contact properties",
+    "params": [
+      {
+        "name": "fallback_value",
+        "type": "string",
+        "description": "Value used where a contact has none (a number for number properties)."
+      },
+      {
+        "name": "key",
+        "type": "string",
+        "description": "Letters, digits and underscores, at most 50 characters.",
+        "required": true
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "enum": [
+          "string",
+          "number"
+        ],
+        "description": "Value type.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "fallback_value": {
+          "description": "Value used where a contact has none (a number for number properties).",
+          "type": "string"
+        },
+        "key": {
+          "description": "Letters, digits and underscores, at most 50 characters.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Value type.",
+          "enum": [
+            "string",
+            "number"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "type"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-contact-properties",
+    "description": "List custom contact properties, optionally filtered by search.",
+    "method": "GET",
+    "path": "/contact-properties",
+    "family": "Contact properties",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches the key."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches the key.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-contact-property",
+    "description": "Get a custom contact property.",
+    "method": "GET",
+    "path": "/contact-properties/{id}",
+    "family": "Contact properties",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact property id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact property id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-contact-property",
+    "description": "Change a contact property's fallback value (key and type are fixed).",
+    "method": "PATCH",
+    "path": "/contact-properties/{id}",
+    "family": "Contact properties",
+    "params": [
+      {
+        "name": "fallback_value",
+        "type": "string",
+        "description": "New fallback value (a number for number properties), or null."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact property id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "fallback_value": {
+          "description": "New fallback value (a number for number properties), or null.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The contact property id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-contact-property",
+    "description": "Delete a custom contact property.",
+    "method": "DELETE",
+    "path": "/contact-properties/{id}",
+    "family": "Contact properties",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The contact property id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The contact property id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-segment",
+    "description": "Create a segment (a static list of contacts).",
+    "method": "POST",
+    "path": "/segments",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-segments",
+    "description": "List segments, optionally filtered by search.",
+    "method": "GET",
+    "path": "/segments",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches the name."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches the name.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-segment",
+    "description": "Get a segment.",
+    "method": "GET",
+    "path": "/segments/{id}",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The segment id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-segment",
+    "description": "Rename a segment.",
+    "method": "PATCH",
+    "path": "/segments/{id}",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The segment id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-segment",
+    "description": "Delete a segment (its contacts are kept).",
+    "method": "DELETE",
+    "path": "/segments/{id}",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The segment id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-segment-contacts",
+    "description": "List a segment's members with their status in it.",
+    "method": "GET",
+    "path": "/segments/{id}/contacts",
+    "family": "Segments",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The segment id.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "subscribed",
+          "unsubscribed",
+          "cleaned",
+          "pending"
+        ],
+        "description": "Only members with this status."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The segment id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "description": "Only members with this status.",
+          "enum": [
+            "subscribed",
+            "unsubscribed",
+            "cleaned",
+            "pending"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-topic",
+    "description": "Create a topic contacts can subscribe to or opt out of.",
+    "method": "POST",
+    "path": "/topics",
+    "family": "Topics",
+    "params": [
+      {
+        "name": "default_subscription",
+        "type": "string",
+        "enum": [
+          "opt_in",
+          "opt_out"
+        ],
+        "description": "opt_in: everyone unless they opt out; opt_out: only those who opt in. Fixed once created.",
+        "required": true
+      },
+      {
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "visibility",
+        "type": "string",
+        "enum": [
+          "public",
+          "private"
+        ],
+        "description": "Whether contacts see the topic on the preferences page."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "default_subscription": {
+          "description": "opt_in: everyone unless they opt out; opt_out: only those who opt in. Fixed once created.",
+          "enum": [
+            "opt_in",
+            "opt_out"
+          ],
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "visibility": {
+          "description": "Whether contacts see the topic on the preferences page.",
+          "enum": [
+            "public",
+            "private"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "default_subscription"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-topics",
+    "description": "List topics, optionally filtered by search.",
+    "method": "GET",
+    "path": "/topics",
+    "family": "Topics",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches the name or description."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches the name or description.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-topic",
+    "description": "Get a topic.",
+    "method": "GET",
+    "path": "/topics/{id}",
+    "family": "Topics",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The topic id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The topic id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-topic",
+    "description": "Update a topic's name, description or visibility.",
+    "method": "PATCH",
+    "path": "/topics/{id}",
+    "family": "Topics",
+    "params": [
+      {
+        "name": "description",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The topic id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "visibility",
+        "type": "string",
+        "enum": [
+          "public",
+          "private"
+        ],
+        "description": "Whether contacts see the topic on the preferences page."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The topic id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "visibility": {
+          "description": "Whether contacts see the topic on the preferences page.",
+          "enum": [
+            "public",
+            "private"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-topic",
+    "description": "Delete a topic.",
+    "method": "DELETE",
+    "path": "/topics/{id}",
+    "family": "Topics",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The topic id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The topic id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-broadcast",
+    "description": "Create a broadcast: a draft (any field may be left out until it is sent) unless send is true, which needs from, subject, a body and recipients.",
+    "method": "POST",
+    "path": "/broadcasts",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "audience",
+        "type": "string",
+        "enum": [
+          "all",
+          "segments"
+        ],
+        "description": "all: every subscribed contact; segments (default): the segments' members."
+      },
+      {
+        "name": "exclude_segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Never send to members of these segments."
+      },
+      {
+        "name": "from",
+        "type": "string"
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "preview_text",
+        "type": "string"
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses."
+      },
+      {
+        "name": "scheduled_at",
+        "type": "string",
+        "description": "Send time: ISO 8601 or relative time (in 30 minutes, in 2 hours, in 3 days), within 30 days; needs send: true."
+      },
+      {
+        "name": "segment_id",
+        "type": "string",
+        "description": "Send to this segment's subscribed members."
+      },
+      {
+        "name": "segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Send to several segments (each contact once)."
+      },
+      {
+        "name": "send",
+        "type": "boolean",
+        "description": "Send (or schedule) right away instead of saving a draft."
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "template_engine",
+        "type": "string",
+        "enum": [
+          "simple",
+          "handlebars"
+        ],
+        "description": "simple: contact merge tags (default); handlebars: Handlebars per recipient with the contact as data."
+      },
+      {
+        "name": "template_id",
+        "type": "string",
+        "description": "Start from this published template (id or alias): its content and engine fill the fields not given."
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Topic the broadcast belongs to (opted-out contacts are skipped)."
+      },
+      {
+        "name": "tracking",
+        "type": "boolean",
+        "description": "Count opens and clicks (default true)."
+      },
+      {
+        "name": "unsubscribe_scope",
+        "type": "string",
+        "enum": [
+          "all",
+          "list"
+        ],
+        "description": "What the unsubscribe link leaves."
+      },
+      {
+        "name": "version_comment",
+        "type": "string",
+        "description": "Comment for the version this save records."
+      },
+      {
+        "name": "version_name",
+        "type": "string",
+        "description": "Label for the version this save records."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "audience": {
+          "description": "all: every subscribed contact; segments (default): the segments' members.",
+          "enum": [
+            "all",
+            "segments"
+          ],
+          "type": "string"
+        },
+        "exclude_segment_ids": {
+          "description": "Never send to members of these segments.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "from": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "preview_text": {
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Reply-To addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "scheduled_at": {
+          "description": "Send time: ISO 8601 or relative time (in 30 minutes, in 2 hours, in 3 days), within 30 days; needs send: true.",
+          "type": "string"
+        },
+        "segment_id": {
+          "description": "Send to this segment's subscribed members.",
+          "type": "string"
+        },
+        "segment_ids": {
+          "description": "Send to several segments (each contact once).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "send": {
+          "description": "Send (or schedule) right away instead of saving a draft.",
+          "type": "boolean"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "template_engine": {
+          "description": "simple: contact merge tags (default); handlebars: Handlebars per recipient with the contact as data.",
+          "enum": [
+            "simple",
+            "handlebars"
+          ],
+          "type": "string"
+        },
+        "template_id": {
+          "description": "Start from this published template (id or alias): its content and engine fill the fields not given.",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "topic_id": {
+          "description": "Topic the broadcast belongs to (opted-out contacts are skipped).",
+          "type": "string"
+        },
+        "tracking": {
+          "description": "Count opens and clicks (default true).",
+          "type": "boolean"
+        },
+        "unsubscribe_scope": {
+          "description": "What the unsubscribe link leaves.",
+          "enum": [
+            "all",
+            "list"
+          ],
+          "type": "string"
+        },
+        "version_comment": {
+          "description": "Comment for the version this save records.",
+          "type": "string"
+        },
+        "version_name": {
+          "description": "Label for the version this save records.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-broadcasts",
+    "description": "List broadcasts, optionally filtered by status, segment or search.",
+    "method": "GET",
+    "path": "/broadcasts",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches the name."
+      },
+      {
+        "name": "segment_id",
+        "type": "string"
+      },
+      {
+        "name": "status",
+        "type": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches the name.",
+          "type": "string"
+        },
+        "segment_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-broadcast",
+    "description": "Get a broadcast.",
+    "method": "GET",
+    "path": "/broadcasts/{id}",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-broadcast",
+    "description": "Update a draft or scheduled broadcast (only the name once it is sending).",
+    "method": "PATCH",
+    "path": "/broadcasts/{id}",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "audience",
+        "type": "string",
+        "enum": [
+          "all",
+          "segments"
+        ],
+        "description": "all: every subscribed contact; segments (default): the segments' members."
+      },
+      {
+        "name": "exclude_segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Never send to members of these segments."
+      },
+      {
+        "name": "from",
+        "type": "string"
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "preview_text",
+        "type": "string"
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses."
+      },
+      {
+        "name": "segment_id",
+        "type": "string",
+        "description": "Send to this segment's subscribed members."
+      },
+      {
+        "name": "segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Send to several segments (each contact once)."
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "template_engine",
+        "type": "string",
+        "enum": [
+          "simple",
+          "handlebars"
+        ],
+        "description": "simple: contact merge tags (default); handlebars: Handlebars per recipient with the contact as data."
+      },
+      {
+        "name": "template_id",
+        "type": "string",
+        "description": "Start from this published template (id or alias): its content and engine fill the fields not given."
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Topic the broadcast belongs to (opted-out contacts are skipped)."
+      },
+      {
+        "name": "tracking",
+        "type": "boolean",
+        "description": "Count opens and clicks (default true)."
+      },
+      {
+        "name": "unsubscribe_scope",
+        "type": "string",
+        "enum": [
+          "all",
+          "list"
+        ],
+        "description": "What the unsubscribe link leaves."
+      },
+      {
+        "name": "version_comment",
+        "type": "string",
+        "description": "Comment for the version this save records."
+      },
+      {
+        "name": "version_name",
+        "type": "string",
+        "description": "Label for the version this save records."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "audience": {
+          "description": "all: every subscribed contact; segments (default): the segments' members.",
+          "enum": [
+            "all",
+            "segments"
+          ],
+          "type": "string"
+        },
+        "exclude_segment_ids": {
+          "description": "Never send to members of these segments.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "from": {
+          "type": "string"
+        },
+        "html": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "preview_text": {
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Reply-To addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "segment_id": {
+          "description": "Send to this segment's subscribed members.",
+          "type": "string"
+        },
+        "segment_ids": {
+          "description": "Send to several segments (each contact once).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "template_engine": {
+          "description": "simple: contact merge tags (default); handlebars: Handlebars per recipient with the contact as data.",
+          "enum": [
+            "simple",
+            "handlebars"
+          ],
+          "type": "string"
+        },
+        "template_id": {
+          "description": "Start from this published template (id or alias): its content and engine fill the fields not given.",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "topic_id": {
+          "description": "Topic the broadcast belongs to (opted-out contacts are skipped).",
+          "type": "string"
+        },
+        "tracking": {
+          "description": "Count opens and clicks (default true).",
+          "type": "boolean"
+        },
+        "unsubscribe_scope": {
+          "description": "What the unsubscribe link leaves.",
+          "enum": [
+            "all",
+            "list"
+          ],
+          "type": "string"
+        },
+        "version_comment": {
+          "description": "Comment for the version this save records.",
+          "type": "string"
+        },
+        "version_name": {
+          "description": "Label for the version this save records.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-broadcast",
+    "description": "Send a draft broadcast now, or schedule it with scheduled_at.",
+    "method": "POST",
+    "path": "/broadcasts/{id}/send",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "scheduled_at",
+        "type": "string",
+        "description": "Send time: ISO 8601 or relative time (in 30 minutes, in 2 hours, in 3 days), within 30 days; omit to send now."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "scheduled_at": {
+          "description": "Send time: ISO 8601 or relative time (in 30 minutes, in 2 hours, in 3 days), within 30 days; omit to send now.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "cancel-broadcast",
+    "description": "Cancel a scheduled (back to draft) or sending broadcast.",
+    "method": "POST",
+    "path": "/broadcasts/{id}/cancel",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "duplicate-broadcast",
+    "description": "Copy a broadcast as a new draft.",
+    "method": "POST",
+    "path": "/broadcasts/{id}/duplicate",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-broadcast",
+    "description": "Delete a draft or scheduled broadcast.",
+    "method": "DELETE",
+    "path": "/broadcasts/{id}",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "estimate-broadcast",
+    "description": "Count the contacts an audience reaches now (before suppressions), and how many are skipped as invalid.",
+    "method": "POST",
+    "path": "/broadcasts/estimate",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "audience",
+        "type": "string",
+        "enum": [
+          "all",
+          "segments"
+        ],
+        "description": "all: every subscribed contact; segments (default): the segments' members."
+      },
+      {
+        "name": "exclude_segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Never send to members of these segments."
+      },
+      {
+        "name": "segment_id",
+        "type": "string",
+        "description": "Send to this segment's subscribed members."
+      },
+      {
+        "name": "segment_ids",
+        "type": "array",
+        "items": "string",
+        "description": "Send to several segments (each contact once)."
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Topic the broadcast belongs to (opted-out contacts are skipped)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "audience": {
+          "description": "all: every subscribed contact; segments (default): the segments' members.",
+          "enum": [
+            "all",
+            "segments"
+          ],
+          "type": "string"
+        },
+        "exclude_segment_ids": {
+          "description": "Never send to members of these segments.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "segment_id": {
+          "description": "Send to this segment's subscribed members.",
+          "type": "string"
+        },
+        "segment_ids": {
+          "description": "Send to several segments (each contact once).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "topic_id": {
+          "description": "Topic the broadcast belongs to (opted-out contacts are skipped).",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-test-broadcast",
+    "description": "Send a test of a broadcast to 1 to 5 addresses (subject marked [Test]; not counted as a send). It needs from, subject and a body.",
+    "method": "POST",
+    "path": "/broadcasts/{id}/test",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "description": "1 to 5 recipient addresses.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "to": {
+          "description": "1 to 5 recipient addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-broadcast-stats",
+    "description": "Get a broadcast's numbers: recipients, sent, delivered, opens, clicks, bounces, complaints, unsubscribes and rates.",
+    "method": "GET",
+    "path": "/broadcasts/{id}/stats",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-broadcast-recipients",
+    "description": "List a broadcast's recipients for one event type, optionally filtered by email or bounce type.",
+    "method": "GET",
+    "path": "/broadcasts/{id}/recipients",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "bounce_type",
+        "type": "string",
+        "enum": [
+          "permanent",
+          "transient",
+          "undetermined"
+        ],
+        "description": "Only with type bounced."
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "description": "Only recipients whose address contains this."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "type",
+        "type": "string",
+        "enum": [
+          "sent",
+          "delivered",
+          "opened",
+          "clicked",
+          "bounced",
+          "complained",
+          "unsubscribed",
+          "suppressed"
+        ],
+        "description": "Which recipients: those the broadcast was sent to, delivered to, who opened, clicked, bounced, complained, unsubscribed, or were suppressed.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "bounce_type": {
+          "description": "Only with type bounced.",
+          "enum": [
+            "permanent",
+            "transient",
+            "undetermined"
+          ],
+          "type": "string"
+        },
+        "email": {
+          "description": "Only recipients whose address contains this.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "type": {
+          "description": "Which recipients: those the broadcast was sent to, delivered to, who opened, clicked, bounced, complained, unsubscribed, or were suppressed.",
+          "enum": [
+            "sent",
+            "delivered",
+            "opened",
+            "clicked",
+            "bounced",
+            "complained",
+            "unsubscribed",
+            "suppressed"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-broadcast-clicked-links",
+    "description": "List the links clicked in a broadcast, most clicked first, with total and unique clicks.",
+    "method": "GET",
+    "path": "/broadcasts/{id}/clicked-links",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-broadcast-versions",
+    "description": "List a broadcast's saved versions (one per save), newest first.",
+    "method": "GET",
+    "path": "/broadcasts/{id}/versions",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return versions older than this version id or version number (the last one of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return versions newer than this version id or version number."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return versions older than this version id or version number (the last one of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return versions newer than this version id or version number.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-broadcast-version",
+    "description": "Get one saved version of a broadcast: content, sender and audience.",
+    "method": "GET",
+    "path": "/broadcasts/{id}/versions/{version}",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-broadcast-version",
+    "description": "Rename or comment a saved broadcast version.",
+    "method": "PATCH",
+    "path": "/broadcasts/{id}/versions/{version}",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "comment",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "restore-broadcast-version",
+    "description": "Copy a saved version back into a draft or scheduled broadcast (saved as a new version; nothing is sent).",
+    "method": "POST",
+    "path": "/broadcasts/{id}/versions/{version}/restore",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or version number.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or version number.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-automation",
+    "description": "Create an automation from steps and connections.",
+    "method": "POST",
+    "path": "/automations",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "connections",
+        "type": "array",
+        "items": "object",
+        "description": "Connections between steps, [{from, to, ...}].",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "enabled",
+          "disabled"
+        ],
+        "description": "Automation status."
+      },
+      {
+        "name": "steps",
+        "type": "array",
+        "items": "object",
+        "description": "Steps as the API takes them (snake_case configs).",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "connections": {
+          "description": "Connections between steps, [{from, to, ...}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "description": "Automation status.",
+          "enum": [
+            "enabled",
+            "disabled"
+          ],
+          "type": "string"
+        },
+        "steps": {
+          "description": "Steps as the API takes them (snake_case configs).",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "steps",
+        "connections"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-automations",
+    "description": "List automations.",
+    "method": "GET",
+    "path": "/automations",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "enabled",
+          "disabled"
+        ],
+        "description": "Automation status."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "description": "Automation status.",
+          "enum": [
+            "enabled",
+            "disabled"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "import-automation-http-step",
+    "description": "Turn a curl command or a copied n8n HTTP Request node into the config of an HTTP request (webhook) step, with warnings to check. Only parses: nothing is called or saved.",
+    "method": "POST",
+    "path": "/automations/http/import",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "curl",
+        "type": "string",
+        "description": "A curl command, as pasted."
+      },
+      {
+        "name": "n8n",
+        "type": "string",
+        "description": "The copied n8n node(s): what n8n puts on the clipboard, or one node, as JSON text."
+      },
+      {
+        "name": "node",
+        "type": "string",
+        "description": "With n8n: the name of the HTTP Request node to import when there are several."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "curl": {
+          "description": "A curl command, as pasted.",
+          "type": "string"
+        },
+        "n8n": {
+          "description": "The copied n8n node(s): what n8n puts on the clipboard, or one node, as JSON text.",
+          "type": "string"
+        },
+        "node": {
+          "description": "With n8n: the name of the HTTP Request node to import when there are several.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-automation",
+    "description": "Get an automation with its steps.",
+    "method": "GET",
+    "path": "/automations/{id}",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-automation",
+    "description": "Update an automation's name, status, steps or connections.",
+    "method": "PATCH",
+    "path": "/automations/{id}",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "connections",
+        "type": "array",
+        "items": "object",
+        "description": "Connections between steps, [{from, to, ...}]."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "enabled",
+          "disabled"
+        ],
+        "description": "Automation status."
+      },
+      {
+        "name": "steps",
+        "type": "array",
+        "items": "object",
+        "description": "Steps as the API takes them (snake_case configs)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "connections": {
+          "description": "Connections between steps, [{from, to, ...}].",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "description": "Automation status.",
+          "enum": [
+            "enabled",
+            "disabled"
+          ],
+          "type": "string"
+        },
+        "steps": {
+          "description": "Steps as the API takes them (snake_case configs).",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "duplicate-automation",
+    "description": "Copy an automation.",
+    "method": "POST",
+    "path": "/automations/{id}/duplicate",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "stop-automation",
+    "description": "Stop an automation and its active runs.",
+    "method": "POST",
+    "path": "/automations/{id}/stop",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-automation",
+    "description": "Delete an automation.",
+    "method": "DELETE",
+    "path": "/automations/{id}",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-automation-runs",
+    "description": "List an automation's runs.",
+    "method": "GET",
+    "path": "/automations/{id}/runs",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "status",
+        "type": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-automation-run",
+    "description": "Get one automation run with its steps.",
+    "method": "GET",
+    "path": "/automations/{id}/runs/{run}",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The automation id.",
+        "required": true
+      },
+      {
+        "name": "run",
+        "type": "string",
+        "description": "The run id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The automation id.",
+          "type": "string"
+        },
+        "run": {
+          "description": "The run id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "run"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "test-automation-http",
+    "description": "Send one real test request for an HTTP request (webhook) step config and show the answer (admins).",
+    "method": "POST",
+    "path": "/automations/http/test",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "automation_id",
+        "type": "string",
+        "description": "Workflow whose saved secret header values fill empty secret headers."
+      },
+      {
+        "name": "config",
+        "type": "object",
+        "description": "The step config: {url, method, headers [{name, value, secret}], body_type, body, timeout_seconds}.",
+        "required": true
+      },
+      {
+        "name": "contact_id",
+        "type": "string",
+        "description": "Contact whose fields fill {{contact.*}} (default: a sample contact)."
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "description": "Contact email, instead of contact_id."
+      },
+      {
+        "name": "event",
+        "type": "object",
+        "description": "Sample event payload for {{event.*}}."
+      },
+      {
+        "name": "step_key",
+        "type": "string",
+        "description": "The step of that workflow."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "automation_id": {
+          "description": "Workflow whose saved secret header values fill empty secret headers.",
+          "type": "string"
+        },
+        "config": {
+          "description": "The step config: {url, method, headers [{name, value, secret}], body_type, body, timeout_seconds}.",
+          "type": "object"
+        },
+        "contact_id": {
+          "description": "Contact whose fields fill {{contact.*}} (default: a sample contact).",
+          "type": "string"
+        },
+        "email": {
+          "description": "Contact email, instead of contact_id.",
+          "type": "string"
+        },
+        "event": {
+          "description": "Sample event payload for {{event.*}}.",
+          "type": "object"
+        },
+        "step_key": {
+          "description": "The step of that workflow.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-automation-signing-secret",
+    "description": "Get the secret that signs workflow HTTP requests (webhook-signature header), to verify them (admins).",
+    "method": "GET",
+    "path": "/automations/signing-secret",
+    "family": "Automations",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "rotate-automation-signing-secret",
+    "description": "Replace the secret that signs workflow HTTP requests (admins).",
+    "method": "POST",
+    "path": "/automations/signing-secret/rotate",
+    "family": "Automations",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-automation-templates",
+    "description": "List the ready-made workflow templates: slug, kind, events, emails and how many of your automations use each.",
+    "method": "GET",
+    "path": "/automation-templates",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "category",
+        "type": "string",
+        "enum": [
+          "onboarding",
+          "billing",
+          "ecommerce",
+          "engagement",
+          "lead_capture",
+          "internal"
+        ],
+        "description": "Only this category."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "description": "Only this category.",
+          "enum": [
+            "onboarding",
+            "billing",
+            "ecommerce",
+            "engagement",
+            "lead_capture",
+            "internal"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-automation-template",
+    "description": "Get a workflow template: its steps, emails (filled with your brand), events (and whether your team has them) and the params setup takes.",
+    "method": "GET",
+    "path": "/automation-templates/{slug}",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "slug",
+        "type": "string",
+        "description": "The template slug, e.g. email-verification-reminder.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "description": "The template slug, e.g. email-verification-reminder.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "slug"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-automation-from-template",
+    "description": "Set up a template as a new automation, disabled: creates the missing events, the workflow's emails and the automation in one transaction.",
+    "method": "POST",
+    "path": "/automations/from-template",
+    "family": "Automations",
+    "params": [
+      {
+        "name": "events",
+        "type": "object",
+        "description": "Per event ref: {\"mode\": \"create\" | \"existing\", \"name\"}. create (the default) uses or creates the template's event; existing maps the ref to an event your app already sends."
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "string",
+        "description": "Idempotency-Key header: a retry with the same key returns the first answer instead of a second automation."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "1 to 120 characters. Default: the template's name."
+      },
+      {
+        "name": "params",
+        "type": "object",
+        "description": "Per param ref. A duration: \"24 hours\", \"2 days\" (its default applies when left out). A url: required, a full https link."
+      },
+      {
+        "name": "sender",
+        "type": "object",
+        "description": "{\"from\", \"reply_to\"?}. from must be on a verified sending domain.",
+        "required": true
+      },
+      {
+        "name": "slug",
+        "type": "string",
+        "description": "The template slug, e.g. email-verification-reminder.",
+        "required": true
+      },
+      {
+        "name": "topic_id",
+        "type": "string",
+        "description": "Required for a marketing template: the topic contacts can unsubscribe from."
+      },
+      {
+        "name": "version",
+        "type": "integer",
+        "description": "The version you reviewed; a newer one is refused (template_version_changed)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "events": {
+          "description": "Per event ref: {\"mode\": \"create\" | \"existing\", \"name\"}. create (the default) uses or creates the template's event; existing maps the ref to an event your app already sends.",
+          "type": "object"
+        },
+        "idempotencyKey": {
+          "description": "Idempotency-Key header: a retry with the same key returns the first answer instead of a second automation.",
+          "type": "string"
+        },
+        "name": {
+          "description": "1 to 120 characters. Default: the template's name.",
+          "type": "string"
+        },
+        "params": {
+          "description": "Per param ref. A duration: \"24 hours\", \"2 days\" (its default applies when left out). A url: required, a full https link.",
+          "type": "object"
+        },
+        "sender": {
+          "description": "{\"from\", \"reply_to\"?}. from must be on a verified sending domain.",
+          "type": "object"
+        },
+        "slug": {
+          "description": "The template slug, e.g. email-verification-reminder.",
+          "type": "string"
+        },
+        "topic_id": {
+          "description": "Required for a marketing template: the topic contacts can unsubscribe from.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version you reviewed; a newer one is refused (template_version_changed).",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "slug",
+        "sender"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-event",
+    "description": "Send an event for a contact, triggering automations that listen for it.",
+    "method": "POST",
+    "path": "/events/send",
+    "family": "Events",
+    "params": [
+      {
+        "name": "contact_id",
+        "type": "string"
+      },
+      {
+        "name": "email",
+        "type": "string"
+      },
+      {
+        "name": "event",
+        "type": "string",
+        "description": "Event name.",
+        "required": true
+      },
+      {
+        "name": "payload",
+        "type": "object",
+        "description": "Event data."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "contact_id": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "event": {
+          "description": "Event name.",
+          "type": "string"
+        },
+        "payload": {
+          "description": "Event data.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "event"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-event",
+    "description": "Define an event with an optional payload schema.",
+    "method": "POST",
+    "path": "/events",
+    "family": "Events",
+    "params": [
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "schema",
+        "type": "object",
+        "description": "Payload schema."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "description": "Payload schema.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-events",
+    "description": "List defined events.",
+    "method": "GET",
+    "path": "/events",
+    "family": "Events",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-event",
+    "description": "Get a defined event.",
+    "method": "GET",
+    "path": "/events/{id}",
+    "family": "Events",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The event id or name.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The event id or name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-event",
+    "description": "Update an event's payload schema.",
+    "method": "PATCH",
+    "path": "/events/{id}",
+    "family": "Events",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The event id or name.",
+        "required": true
+      },
+      {
+        "name": "schema",
+        "type": "object",
+        "description": "Payload schema.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The event id or name.",
+          "type": "string"
+        },
+        "schema": {
+          "description": "Payload schema.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "schema"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-event",
+    "description": "Delete a defined event.",
+    "method": "DELETE",
+    "path": "/events/{id}",
+    "family": "Events",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The event id or name.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The event id or name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-domain",
+    "description": "Add a sending domain, optionally also receiving, and get the DNS records to publish.",
+    "method": "POST",
+    "path": "/domains",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "click_tracking",
+        "type": "boolean",
+        "description": "Track clicks."
+      },
+      {
+        "name": "custom_return_path",
+        "type": "string",
+        "description": "Return-Path subdomain label."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "open_tracking",
+        "type": "boolean",
+        "description": "Track opens."
+      },
+      {
+        "name": "receiving",
+        "type": "boolean",
+        "description": "Receive email for this domain too: adds an MX record to publish (it redirects mail the domain already receives elsewhere)."
+      },
+      {
+        "name": "region",
+        "type": "string"
+      },
+      {
+        "name": "tracking_subdomain",
+        "type": "string",
+        "description": "Subdomain label for tracked links (can be changed, not removed)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "click_tracking": {
+          "description": "Track clicks.",
+          "type": "boolean"
+        },
+        "custom_return_path": {
+          "description": "Return-Path subdomain label.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "open_tracking": {
+          "description": "Track opens.",
+          "type": "boolean"
+        },
+        "receiving": {
+          "description": "Receive email for this domain too: adds an MX record to publish (it redirects mail the domain already receives elsewhere).",
+          "type": "boolean"
+        },
+        "region": {
+          "type": "string"
+        },
+        "tracking_subdomain": {
+          "description": "Subdomain label for tracked links (can be changed, not removed).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-domains",
+    "description": "List domains.",
+    "method": "GET",
+    "path": "/domains",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-domain",
+    "description": "Get a domain with its DNS records and status.",
+    "method": "GET",
+    "path": "/domains/{id}",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The domain id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The domain id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-domain",
+    "description": "Update a domain's open/click tracking, tracking subdomain, TLS policy or receiving.",
+    "method": "PATCH",
+    "path": "/domains/{id}",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "click_tracking",
+        "type": "boolean",
+        "description": "Track clicks."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The domain id.",
+        "required": true
+      },
+      {
+        "name": "open_tracking",
+        "type": "boolean",
+        "description": "Track opens."
+      },
+      {
+        "name": "receiving",
+        "type": "boolean",
+        "description": "Turn receiving on or off. Off: send.io stops accepting this domain's email (remove the MX record). On: publish the MX record it asks for."
+      },
+      {
+        "name": "tls",
+        "type": "string",
+        "enum": [
+          "opportunistic",
+          "enforced"
+        ],
+        "description": "TLS policy."
+      },
+      {
+        "name": "tracking_subdomain",
+        "type": "string",
+        "description": "Subdomain label for tracked links (can be changed, not removed)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "click_tracking": {
+          "description": "Track clicks.",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "The domain id.",
+          "type": "string"
+        },
+        "open_tracking": {
+          "description": "Track opens.",
+          "type": "boolean"
+        },
+        "receiving": {
+          "description": "Turn receiving on or off. Off: send.io stops accepting this domain's email (remove the MX record). On: publish the MX record it asks for.",
+          "type": "boolean"
+        },
+        "tls": {
+          "description": "TLS policy.",
+          "enum": [
+            "opportunistic",
+            "enforced"
+          ],
+          "type": "string"
+        },
+        "tracking_subdomain": {
+          "description": "Subdomain label for tracked links (can be changed, not removed).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "verify-domain",
+    "description": "Check a domain's DNS records now.",
+    "method": "POST",
+    "path": "/domains/{id}/verify",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The domain id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The domain id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-domain",
+    "description": "Delete a domain.",
+    "method": "DELETE",
+    "path": "/domains/{id}",
+    "family": "Domains",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The domain id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The domain id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-api-key",
+    "description": "Create an API key (the token is shown once).",
+    "method": "POST",
+    "path": "/api-keys",
+    "family": "API keys",
+    "params": [
+      {
+        "name": "domain_id",
+        "type": "string",
+        "description": "Restrict a sending key to one domain."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "permission",
+        "type": "string",
+        "enum": [
+          "full_access",
+          "sending_access"
+        ],
+        "description": "Key scope."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "domain_id": {
+          "description": "Restrict a sending key to one domain.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "permission": {
+          "description": "Key scope.",
+          "enum": [
+            "full_access",
+            "sending_access"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-api-keys",
+    "description": "List active API keys.",
+    "method": "GET",
+    "path": "/api-keys",
+    "family": "API keys",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-api-key",
+    "description": "Get an API key with its recent usage.",
+    "method": "GET",
+    "path": "/api-keys/{id}",
+    "family": "API keys",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The API key id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The API key id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-api-key",
+    "description": "Rename an API key.",
+    "method": "PATCH",
+    "path": "/api-keys/{id}",
+    "family": "API keys",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The API key id.",
+        "required": true
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The API key id.",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-api-key",
+    "description": "Revoke an API key.",
+    "method": "DELETE",
+    "path": "/api-keys/{id}",
+    "family": "API keys",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The API key id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The API key id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-webhook",
+    "description": "Create a webhook endpoint for the given events (the signing secret is returned).",
+    "method": "POST",
+    "path": "/webhooks",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "endpoint",
+        "type": "string",
+        "description": "HTTPS URL.",
+        "required": true
+      },
+      {
+        "name": "events",
+        "type": "array",
+        "items": "string",
+        "description": "Event types, e.g. email.sent, email.delivered, email.bounced, contact.created.",
+        "required": true
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "description": "Payload format (default sendio)."
+      },
+      {
+        "name": "headers",
+        "type": "object",
+        "description": "Extra request headers, {name: value}."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "description": "HTTPS URL.",
+          "type": "string"
+        },
+        "events": {
+          "description": "Event types, e.g. email.sent, email.delivered, email.bounced, contact.created.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "format": {
+          "description": "Payload format (default sendio).",
+          "type": "string"
+        },
+        "headers": {
+          "description": "Extra request headers, {name: value}.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "endpoint",
+        "events"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-webhooks",
+    "description": "List webhooks.",
+    "method": "GET",
+    "path": "/webhooks",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-webhook",
+    "description": "Get a webhook with its signing secret.",
+    "method": "GET",
+    "path": "/webhooks/{id}",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The webhook id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The webhook id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-webhook",
+    "description": "Update a webhook's endpoint, events, headers or status.",
+    "method": "PATCH",
+    "path": "/webhooks/{id}",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "endpoint",
+        "type": "string",
+        "description": "HTTPS URL."
+      },
+      {
+        "name": "events",
+        "type": "array",
+        "items": "string",
+        "description": "Event types, e.g. email.sent, email.delivered, email.bounced, contact.created."
+      },
+      {
+        "name": "format",
+        "type": "string"
+      },
+      {
+        "name": "headers",
+        "type": "object",
+        "description": "Extra request headers, {name: value}."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The webhook id.",
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "string",
+        "enum": [
+          "enabled",
+          "disabled"
+        ],
+        "description": "Webhook status."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "description": "HTTPS URL.",
+          "type": "string"
+        },
+        "events": {
+          "description": "Event types, e.g. email.sent, email.delivered, email.bounced, contact.created.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "format": {
+          "type": "string"
+        },
+        "headers": {
+          "description": "Extra request headers, {name: value}.",
+          "type": "object"
+        },
+        "id": {
+          "description": "The webhook id.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Webhook status.",
+          "enum": [
+            "enabled",
+            "disabled"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "rotate-webhook-signing-secret",
+    "description": "Rotate a webhook's signing secret.",
+    "method": "POST",
+    "path": "/webhooks/{id}/signing-secret/rotate",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The webhook id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The webhook id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-webhook",
+    "description": "Delete a webhook.",
+    "method": "DELETE",
+    "path": "/webhooks/{id}",
+    "family": "Webhooks",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The webhook id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The webhook id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "add-suppression",
+    "description": "Suppress an address so no email is sent to it.",
+    "method": "POST",
+    "path": "/suppressions",
+    "family": "Suppressions",
+    "params": [
+      {
+        "name": "comment",
+        "type": "string"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "expires_at",
+        "type": "string",
+        "description": "When the suppression lapses (ISO 8601)."
+      },
+      {
+        "name": "origin",
+        "type": "string",
+        "enum": [
+          "bounce",
+          "soft_bounce",
+          "complaint",
+          "manual",
+          "invalid",
+          "block"
+        ],
+        "description": "Why the address is suppressed."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "comment": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "expires_at": {
+          "description": "When the suppression lapses (ISO 8601).",
+          "type": "string"
+        },
+        "origin": {
+          "description": "Why the address is suppressed.",
+          "enum": [
+            "bounce",
+            "soft_bounce",
+            "complaint",
+            "manual",
+            "invalid",
+            "block"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-suppressions",
+    "description": "List suppressed addresses.",
+    "method": "GET",
+    "path": "/suppressions",
+    "family": "Suppressions",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "description": "Address contains this text."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "origin",
+        "type": "string",
+        "description": "Comma-separated origins."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "email": {
+          "description": "Address contains this text.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "origin": {
+          "description": "Comma-separated origins.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-suppression",
+    "description": "Get a suppression.",
+    "method": "GET",
+    "path": "/suppressions/{id}",
+    "family": "Suppressions",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The suppression id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The suppression id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-suppression",
+    "description": "Remove a suppression so the address can receive email again.",
+    "method": "DELETE",
+    "path": "/suppressions/{id}",
+    "family": "Suppressions",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The suppression id or email address.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The suppression id or email address.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-logs",
+    "description": "List API request logs, newest first.",
+    "method": "GET",
+    "path": "/logs",
+    "family": "Logs",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-log",
+    "description": "Get one API request log with its request and response bodies.",
+    "method": "GET",
+    "path": "/logs/{id}",
+    "family": "Logs",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The log id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The log id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-mailboxes",
+    "description": "List mailboxes with their 30-day sending health.",
+    "method": "GET",
+    "path": "/mailboxes",
+    "family": "Mailboxes",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-mailbox",
+    "description": "Create a mailbox on a verified domain (its IMAP/SMTP password is returned once), or a free mailbox when no domain is given.",
+    "method": "POST",
+    "path": "/mailboxes",
+    "family": "Mailboxes",
+    "params": [
+      {
+        "name": "address",
+        "type": "string",
+        "description": "The full address, e.g. hello@example.com."
+      },
+      {
+        "name": "display_name",
+        "type": "string",
+        "description": "Free mailbox: the sender name."
+      },
+      {
+        "name": "domain_id",
+        "type": "string",
+        "description": "A verified domain's id, with local_part."
+      },
+      {
+        "name": "local_part",
+        "type": "string",
+        "description": "The part before @, with domain_id instead of address."
+      },
+      {
+        "name": "org",
+        "type": "string",
+        "description": "Free mailbox: the organisation part of the address."
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Free mailbox: the name before @."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "address": {
+          "description": "The full address, e.g. hello@example.com.",
+          "type": "string"
+        },
+        "display_name": {
+          "description": "Free mailbox: the sender name.",
+          "type": "string"
+        },
+        "domain_id": {
+          "description": "A verified domain's id, with local_part.",
+          "type": "string"
+        },
+        "local_part": {
+          "description": "The part before @, with domain_id instead of address.",
+          "type": "string"
+        },
+        "org": {
+          "description": "Free mailbox: the organisation part of the address.",
+          "type": "string"
+        },
+        "username": {
+          "description": "Free mailbox: the name before @.",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-mailbox",
+    "description": "Turn a mailbox's warmup on or off.",
+    "method": "PATCH",
+    "path": "/mailboxes/{id}",
+    "family": "Mailboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The mailbox id.",
+        "required": true
+      },
+      {
+        "name": "warmup_enabled",
+        "type": "boolean",
+        "description": "Warm the mailbox up.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The mailbox id.",
+          "type": "string"
+        },
+        "warmup_enabled": {
+          "description": "Warm the mailbox up.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "warmup_enabled"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "reset-mailbox-password",
+    "description": "Set a new IMAP/SMTP password for a mailbox (shown once; the old one stops working).",
+    "method": "POST",
+    "path": "/mailboxes/{id}/password",
+    "family": "Mailboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The mailbox id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The mailbox id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "delete-mailbox",
+    "description": "Delete a mailbox and its email account (its agent, if any, goes with it).",
+    "method": "DELETE",
+    "path": "/mailboxes/{id}",
+    "family": "Mailboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The mailbox id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The mailbox id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-inbox",
+    "description": "Create an agent inbox.",
+    "method": "POST",
+    "path": "/inboxes",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "client_id",
+        "type": "string"
+      },
+      {
+        "name": "display_name",
+        "type": "string"
+      },
+      {
+        "name": "domain",
+        "type": "string"
+      },
+      {
+        "name": "username",
+        "type": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "client_id": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-inboxes",
+    "description": "List agent inboxes.",
+    "method": "GET",
+    "path": "/inboxes",
+    "family": "Agent inboxes",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-inbox",
+    "description": "Get an agent inbox.",
+    "method": "GET",
+    "path": "/inboxes/{id}",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "delete-inbox",
+    "description": "Delete an agent inbox. By default a mailbox the inbox created is deleted with it; keep_mailbox turns the agent off and keeps the mailbox.",
+    "method": "DELETE",
+    "path": "/inboxes/{id}",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "keep_mailbox",
+        "type": "boolean",
+        "description": "Keep the address as a plain mailbox (IMAP/SMTP keeps working). Not for a free address on the shared domain."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "keep_mailbox": {
+          "description": "Keep the address as a plain mailbox (IMAP/SMTP keeps working). Not for a free address on the shared domain.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-inbox-threads",
+    "description": "List an inbox's threads.",
+    "method": "GET",
+    "path": "/inboxes/{id}/threads",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "filter",
+        "type": "string",
+        "enum": [
+          "all",
+          "unread",
+          "archived"
+        ],
+        "description": "Thread filter."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "label",
+        "type": "string"
+      },
+      {
+        "name": "q",
+        "type": "string",
+        "description": "Search text."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "filter": {
+          "description": "Thread filter.",
+          "enum": [
+            "all",
+            "unread",
+            "archived"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "q": {
+          "description": "Search text.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-inbox-thread",
+    "description": "Get a thread with its messages.",
+    "method": "GET",
+    "path": "/inboxes/{id}/threads/{thread}",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "thread",
+        "type": "string",
+        "description": "The thread id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "thread": {
+          "description": "The thread id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "thread"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-inbox-messages",
+    "description": "List an inbox's messages.",
+    "method": "GET",
+    "path": "/inboxes/{id}/messages",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-inbox-message",
+    "description": "Send a new message from an inbox.",
+    "method": "POST",
+    "path": "/inboxes/{id}/messages",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "bcc",
+        "type": "array",
+        "items": "string"
+      },
+      {
+        "name": "cc",
+        "type": "array",
+        "items": "string"
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "labels",
+        "type": "array",
+        "items": "string"
+      },
+      {
+        "name": "subject",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "bcc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "cc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "html": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "to": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "to",
+        "subject"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "reply-to-thread",
+    "description": "Reply to a thread.",
+    "method": "POST",
+    "path": "/inboxes/{id}/threads/{thread}/reply",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "reply_all",
+        "type": "boolean"
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "thread",
+        "type": "string",
+        "description": "The thread id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "html": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "reply_all": {
+          "type": "boolean"
+        },
+        "text": {
+          "type": "string"
+        },
+        "thread": {
+          "description": "The thread id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "thread"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "forward-thread",
+    "description": "Forward a thread.",
+    "method": "POST",
+    "path": "/inboxes/{id}/threads/{thread}/forward",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "thread",
+        "type": "string",
+        "description": "The thread id.",
+        "required": true
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "thread": {
+          "description": "The thread id.",
+          "type": "string"
+        },
+        "to": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "thread",
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-thread",
+    "description": "Mark a thread read or archived, or change its labels.",
+    "method": "PATCH",
+    "path": "/inbox/threads/{id}",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "add_labels",
+        "type": "array",
+        "items": "string"
+      },
+      {
+        "name": "archived",
+        "type": "boolean"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The thread id.",
+        "required": true
+      },
+      {
+        "name": "read",
+        "type": "boolean"
+      },
+      {
+        "name": "remove_labels",
+        "type": "array",
+        "items": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "add_labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "id": {
+          "description": "The thread id.",
+          "type": "string"
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "remove_labels": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-draft",
+    "description": "Create a draft in an inbox.",
+    "method": "POST",
+    "path": "/inboxes/{id}/drafts",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "cc",
+        "type": "array",
+        "items": "string"
+      },
+      {
+        "name": "html",
+        "type": "string"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "send_at",
+        "type": "string"
+      },
+      {
+        "name": "subject",
+        "type": "string"
+      },
+      {
+        "name": "text",
+        "type": "string"
+      },
+      {
+        "name": "thread_id",
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "cc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "html": {
+          "type": "string"
+        },
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "send_at": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "thread_id": {
+          "type": "string"
+        },
+        "to": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-drafts",
+    "description": "List an inbox's drafts.",
+    "method": "GET",
+    "path": "/inboxes/{id}/drafts",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      },
+      {
+        "name": "status",
+        "type": "string"
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-draft",
+    "description": "Send a draft.",
+    "method": "POST",
+    "path": "/inboxes/{id}/drafts/{draft}/send",
+    "family": "Agent inboxes",
+    "params": [
+      {
+        "name": "draft",
+        "type": "string",
+        "description": "The draft id.",
+        "required": true
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The inbox id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "draft": {
+          "description": "The draft id.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The inbox id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "draft"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-credit-balance",
+    "description": "Get the team's credit balance (a subaccount sees its parent's).",
+    "method": "GET",
+    "path": "/billing/balance",
+    "family": "Billing",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-credit-transactions",
+    "description": "List credit transactions (purchases, usage, grants, refunds), newest first.",
+    "method": "GET",
+    "path": "/billing/transactions",
+    "family": "Billing",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "kind",
+        "type": "string",
+        "enum": [
+          "welcome",
+          "purchase",
+          "grant",
+          "adjustment",
+          "usage",
+          "refund",
+          "migration",
+          "reversal"
+        ],
+        "description": "Only transactions of this kind."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Only transactions of this kind.",
+          "enum": [
+            "welcome",
+            "purchase",
+            "grant",
+            "adjustment",
+            "usage",
+            "refund",
+            "migration",
+            "reversal"
+          ],
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-pricing",
+    "description": "Get what each service costs in credits, the credit packs and custom amounts.",
+    "method": "GET",
+    "path": "/billing/pricing",
+    "family": "Billing",
+    "params": [],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    }
+  }
+]
