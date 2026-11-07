@@ -8,16 +8,16 @@ no prompts).
 
 ## Install
 
-The web app serves the installers and release archives for its environment
-(`frontend/console/scripts/gen-install-scripts.mjs`); binaries come from
-`<site>/cli/download/v<version>/`, checked against `checksums.txt`:
+The web app serves the installers for its environment
+(`frontend/console/scripts/gen-install-scripts.mjs`); binaries come from the
+GitHub releases of `send-io/cli`, checked against `checksums.txt`:
 
 ```sh
 curl -fsSL https://app.send.io/install.sh | sh              # macOS, Linux
 irm https://app.send.io/install.ps1 | iex                   # Windows PowerShell
 ```
 
-This works once a release has been uploaded to that site. From source
+This works once a release is published there. From source
 (Go 1.23+):
 
 ```sh

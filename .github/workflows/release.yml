@@ -4,7 +4,10 @@
 # (@sendio/cli and one per platform) are published through npm trusted
 # publishing (OIDC, with provenance, no token).
 # ponytail: the Docker image, Homebrew tap and Scoop bucket are skipped until
-# their repos and tokens exist; drop them from --skip then.
+# their repos and tokens exist; drop them from --skip then. The npm steps run
+# only when the repository variable NPM_PUBLISH is "true": the first npm
+# publish has to happen once by hand, then the package gets this workflow as
+# its trusted publisher.
 
 name: Release
 
@@ -32,13 +35,17 @@ jobs:
           args: release --clean --skip=docker,homebrew,scoop
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v4
+      - if: ${{ vars.NPM_PUBLISH == 'true' }}
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm install -g npm@latest # trusted publishing needs npm 11.5.1 or later
-      - run: node scripts/npm-packages.mjs
-      - name: Publish the platform packages, then @sendio/cli
+      - if: ${{ vars.NPM_PUBLISH == 'true' }}
+        run: npm install -g npm@latest # trusted publishing needs npm 11.5.1 or later
+      - if: ${{ vars.NPM_PUBLISH == 'true' }}
+        run: node scripts/npm-packages.mjs
+      - if: ${{ vars.NPM_PUBLISH == 'true' }}
+        name: Publish the platform packages, then @sendio/cli
         run: |
           for d in dist/npm/cli-*/; do (cd "$d" && npm publish --access public); done
           cd dist/npm/cli && npm publish --access public

@@ -19,10 +19,9 @@
 # The whole script lives in main(), called on the last line, so a truncated
 # download never runs half a script.
 
-# Where releases come from. Each environment's web build rewrites these two
-# lines (frontend/console/scripts/gen-install-scripts.mjs), so https://<site>/install.sh
-# installs that site's builds: <site>/cli/download/v<version>/<file>, with
-# the newest version in <site>/cli/download/latest. Empty: GitHub releases.
+# Where releases come from. Empty (the default, and what the web build
+# serves): GitHub releases of $SENDIO_REPO. A site that hosts its own builds
+# can set these to <site>/cli/download and <site>/cli/download/latest.
 SENDIO_DEFAULT_DOWNLOAD_BASE=""
 SENDIO_DEFAULT_LATEST_URL=""
 

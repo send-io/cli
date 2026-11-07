@@ -69,7 +69,7 @@ SENDIO_DOWNLOAD_BASE, SENDIO_GITHUB_API, SENDIO_NO_MODIFY_PATH.
     }
 
     $repo = if ($env:SENDIO_REPO) { $env:SENDIO_REPO } else { 'send-io/cli' }
-    # Each environment's web build fills these two in (frontend/console/scripts/gen-install-scripts.mjs).
+    # Empty (the default, and what the web build serves): GitHub releases of $repo.
     $defaultDownloadBase = ''
     $defaultLatestUrl = ''
     $downloadBase = if ($env:SENDIO_DOWNLOAD_BASE) { $env:SENDIO_DOWNLOAD_BASE } elseif ($defaultDownloadBase) { $defaultDownloadBase } else { "https://github.com/$repo/releases/download" }

@@ -186,5 +186,5 @@ release:
   prerelease: auto
   name_template: "sendio {{ .Version }}"
   footer: |
-    Install: `curl -fsSL https://app.send.io/install.sh | sh` (or `brew install --cask send-io/tap/sendio`,
-    `scoop install sendio`, `npm i -g @sendio/cli`).
+    Install: `curl -fsSL https://app.send.io/install.sh | sh` (macOS, Linux)
+    or `irm https://app.send.io/install.ps1 | iex` (Windows PowerShell).
