@@ -214,9 +214,9 @@ latest_version() {
 
 sha256_of() {
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum "$1" | awk '{print $1}'
+    sha256sum < "$1" | awk '{print $1}' # stdin: no file name, so Git Bash on Windows prints no leading backslash
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 "$1" | awk '{print $1}'
+    shasum -a 256 < "$1" | awk '{print $1}'
   elif command -v openssl >/dev/null 2>&1; then
     openssl dgst -sha256 "$1" | awk '{print $NF}'
   else
