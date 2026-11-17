@@ -48,6 +48,10 @@ type Mailbox struct {
 	Complained      int     `json:"complained"`
 	LastSentAt      *string `json:"last_sent_at"`
 	Health          string  `json:"health"`
+	// CanSend says whether POST /emails accepts this address as From now
+	// (the API's own rule); SendReason says why not, in a short line.
+	CanSend    bool    `json:"can_send"`
+	SendReason *string `json:"send_reason"`
 	// Credentials is only set by Create, when IMAP/SMTP is ready. It is shown once.
 	Credentials *MailboxCredentials `json:"credentials,omitempty"`
 }
@@ -129,7 +133,7 @@ type MailboxesSvcImpl struct {
 }
 
 // ListWithContext lists all mailboxes in the project (not paginated)
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) ListWithContext(ctx context.Context) (*ListMailboxesResponse, error) {
 	path := "mailboxes"
 
@@ -153,7 +157,7 @@ func (s *MailboxesSvcImpl) ListWithContext(ctx context.Context) (*ListMailboxesR
 }
 
 // List lists all mailboxes in the project (not paginated)
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) List() (*ListMailboxesResponse, error) {
 	return s.ListWithContext(context.Background())
 }
@@ -161,7 +165,7 @@ func (s *MailboxesSvcImpl) List() (*ListMailboxesResponse, error) {
 // CreateWithContext creates a mailbox. The domain must be verified; the API
 // answers 409 when the address already exists. When IMAP/SMTP is ready, the
 // returned Mailbox carries Credentials, which are shown only once.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) CreateWithContext(ctx context.Context, params *CreateMailboxRequest) (*Mailbox, error) {
 	path := "mailboxes"
 
@@ -185,13 +189,13 @@ func (s *MailboxesSvcImpl) CreateWithContext(ctx context.Context, params *Create
 }
 
 // Create creates a mailbox. See CreateWithContext.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) Create(params *CreateMailboxRequest) (*Mailbox, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // UpdateWithContext turns warmup on or off for a mailbox
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) UpdateWithContext(ctx context.Context, mailboxId string, params *UpdateMailboxRequest) (*Mailbox, error) {
 	path := "mailboxes/" + mailboxId
 
@@ -215,7 +219,7 @@ func (s *MailboxesSvcImpl) UpdateWithContext(ctx context.Context, mailboxId stri
 }
 
 // Update turns warmup on or off for a mailbox
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) Update(mailboxId string, params *UpdateMailboxRequest) (*Mailbox, error) {
 	return s.UpdateWithContext(context.Background(), mailboxId, params)
 }
@@ -223,7 +227,7 @@ func (s *MailboxesSvcImpl) Update(mailboxId string, params *UpdateMailboxRequest
 // ResetPasswordWithContext sets a new password for a mailbox and returns the
 // new credentials. The old password stops working. The password is also an
 // API key for that mailbox.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) ResetPasswordWithContext(ctx context.Context, mailboxId string) (*ResetMailboxPasswordResponse, error) {
 	path := "mailboxes/" + mailboxId + "/password"
 
@@ -247,14 +251,14 @@ func (s *MailboxesSvcImpl) ResetPasswordWithContext(ctx context.Context, mailbox
 }
 
 // ResetPassword sets a new password for a mailbox. See ResetPasswordWithContext.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) ResetPassword(mailboxId string) (*ResetMailboxPasswordResponse, error) {
 	return s.ResetPasswordWithContext(context.Background(), mailboxId)
 }
 
 // RemoveWithContext deletes a mailbox by ID. This removes the email account,
 // and the agent inbox on it if there is one.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) RemoveWithContext(ctx context.Context, mailboxId string) (*RemoveMailboxResponse, error) {
 	path := "mailboxes/" + mailboxId
 
@@ -278,7 +282,7 @@ func (s *MailboxesSvcImpl) RemoveWithContext(ctx context.Context, mailboxId stri
 }
 
 // Remove deletes a mailbox by ID. See RemoveWithContext.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *MailboxesSvcImpl) Remove(mailboxId string) (*RemoveMailboxResponse, error) {
 	return s.RemoveWithContext(context.Background(), mailboxId)
 }

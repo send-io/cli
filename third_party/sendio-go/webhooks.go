@@ -86,7 +86,9 @@ type RotateWebhookSigningSecretResponse struct {
 	SigningSecret string `json:"signing_secret"`
 }
 
-// Webhook represents a webhook object
+// Webhook represents a webhook object. Timestamps are RFC 3339 strings in
+// UTC, for example "2026-11-10T14:40:35.840078+00:00"; parse them with
+// time.Parse(time.RFC3339Nano, ...).
 type Webhook struct {
 	Object        string   `json:"object"`
 	Id            string   `json:"id"`
@@ -95,6 +97,15 @@ type Webhook struct {
 	Endpoint      string   `json:"endpoint,omitempty"`
 	Events        []string `json:"events,omitempty"`
 	SigningSecret string   `json:"signing_secret,omitempty"`
+	// SigningSecretHidden is true when SigningSecret is left out because the
+	// caller is a workspace Member.
+	SigningSecretHidden bool `json:"signing_secret_hidden,omitempty"`
+	// DisabledReason says why send.io disabled the endpoint (after 3 days of
+	// failed deliveries); nil while enabled or when you disabled it.
+	DisabledReason *string `json:"disabled_reason,omitempty"`
+	// FailingSince is when the current run of failed deliveries started
+	// (RFC 3339); nil when the last delivery succeeded.
+	FailingSince *string `json:"failing_since,omitempty"`
 }
 
 // UpdateWebhookRequest represents the parameters for updating a webhook
@@ -119,11 +130,13 @@ type ListWebhooksResponse struct {
 
 // WebhookInList represents a webhook in the list response
 type WebhookInList struct {
-	Id        string   `json:"id"`
-	CreatedAt string   `json:"created_at"`
-	Status    string   `json:"status"`
-	Endpoint  string   `json:"endpoint"`
-	Events    []string `json:"events"`
+	Id             string   `json:"id"`
+	CreatedAt      string   `json:"created_at"`
+	Status         string   `json:"status"`
+	Endpoint       string   `json:"endpoint"`
+	Events         []string `json:"events"`
+	DisabledReason *string  `json:"disabled_reason,omitempty"`
+	FailingSince   *string  `json:"failing_since,omitempty"`
 }
 
 // ListWebhookEventsOptions represents the pagination options for listing webhook events.
@@ -240,7 +253,7 @@ type WebhooksSvcImpl struct {
 }
 
 // CreateWithContext creates a new webhook with the given context
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) CreateWithContext(ctx context.Context, params *CreateWebhookRequest) (*CreateWebhookResponse, error) {
 	path := "webhooks"
 
@@ -265,7 +278,7 @@ func (s *WebhooksSvcImpl) Create(params *CreateWebhookRequest) (*CreateWebhookRe
 }
 
 // GetWithContext retrieves a webhook by ID with the given context
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) GetWithContext(ctx context.Context, webhookId string) (*Webhook, error) {
 	path := "webhooks/" + webhookId
 
@@ -292,7 +305,7 @@ func (s *WebhooksSvcImpl) Get(webhookId string) (*Webhook, error) {
 }
 
 // UpdateWithContext updates a webhook with the given context
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) UpdateWithContext(ctx context.Context, webhookId string, params *UpdateWebhookRequest) (*UpdateWebhookResponse, error) {
 	path := "webhooks/" + webhookId
 
@@ -320,7 +333,7 @@ func (s *WebhooksSvcImpl) Update(webhookId string, params *UpdateWebhookRequest)
 }
 
 // ListWithOptions lists all webhooks with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (*ListWebhooksResponse, error) {
 	path := "webhooks" + buildPaginationQuery(options)
 
@@ -353,7 +366,7 @@ func (s *WebhooksSvcImpl) List() (*ListWebhooksResponse, error) {
 }
 
 // ListEventsWithOptions lists webhook events with pagination options.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) ListEventsWithOptions(ctx context.Context, webhookId string, options *ListWebhookEventsOptions) (*ListWebhookEventsResponse, error) {
 	paginationOptions := &ListOptions{}
 	if options != nil {
@@ -387,7 +400,7 @@ func (s *WebhooksSvcImpl) ListEvents(webhookId string) (*ListWebhookEventsRespon
 }
 
 // GetEventWithContext retrieves a webhook event by ID with the given context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) GetEventWithContext(ctx context.Context, webhookId string, eventId string) (*WebhookEvent, error) {
 	path := "webhooks/" + webhookId + "/events/" + eventId
 
@@ -411,7 +424,7 @@ func (s *WebhooksSvcImpl) GetEvent(webhookId string, eventId string) (*WebhookEv
 }
 
 // ReplayEventWithContext queues one more delivery of a webhook event with the given context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) ReplayEventWithContext(ctx context.Context, webhookId string, eventId string) (*ReplayWebhookEventResponse, error) {
 	path := "webhooks/" + webhookId + "/events/" + eventId + "/replay"
 
@@ -435,7 +448,7 @@ func (s *WebhooksSvcImpl) ReplayEvent(webhookId string, eventId string) (*Replay
 }
 
 // ListEventAttemptsWithOptions lists delivery attempts for a webhook event with pagination options.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) ListEventAttemptsWithOptions(ctx context.Context, webhookId string, eventId string, options *ListWebhookEventAttemptsOptions) (*ListWebhookEventAttemptsResponse, error) {
 	paginationOptions := &ListOptions{}
 	if options != nil {
@@ -469,7 +482,7 @@ func (s *WebhooksSvcImpl) ListEventAttempts(webhookId string, eventId string) (*
 }
 
 // RotateSigningSecretWithContext rotates the signing secret of a webhook with the given context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) RotateSigningSecretWithContext(ctx context.Context, webhookId string) (*RotateWebhookSigningSecretResponse, error) {
 	path := "webhooks/" + webhookId + "/signing-secret/rotate"
 
@@ -493,7 +506,7 @@ func (s *WebhooksSvcImpl) RotateSigningSecret(webhookId string) (*RotateWebhookS
 }
 
 // RemoveWithContext deletes a webhook by ID with the given context
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *WebhooksSvcImpl) RemoveWithContext(ctx context.Context, webhookId string) (*DeleteWebhookResponse, error) {
 	path := "webhooks/" + webhookId
 

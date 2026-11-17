@@ -139,7 +139,7 @@ type Contact struct {
 // Create creates a new Contact based on the given params
 // Supports both global contacts (without audience_id) and audience-specific contacts.
 // Global contacts support custom properties while audience-specific contacts do not.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) Create(params *CreateContactRequest) (CreateContactResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
@@ -147,7 +147,7 @@ func (s *ContactsSvcImpl) Create(params *CreateContactRequest) (CreateContactRes
 // CreateWithContext creates a new Contact based on the given params with context
 // Supports both global contacts (without audience_id) and audience-specific contacts.
 // Global contacts support custom properties while audience-specific contacts do not.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) CreateWithContext(ctx context.Context, params *CreateContactRequest) (CreateContactResponse, error) {
 	if params == nil {
 		return CreateContactResponse{}, errors.New("[ERROR]: params cannot be nil")
@@ -188,7 +188,7 @@ func (s *ContactsSvcImpl) CreateWithContext(ctx context.Context, params *CreateC
 // If options.SegmentId is set, lists contacts in that segment.
 // If options.AudienceId is set (legacy), lists contacts in that audience.
 // Otherwise lists global contacts.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) List(options *ListContactsOptions) (ListContactsResponse, error) {
 	return s.ListWithContext(context.Background(), options)
 }
@@ -197,7 +197,7 @@ func (s *ContactsSvcImpl) List(options *ListContactsOptions) (ListContactsRespon
 // If options.SegmentId is set, lists contacts in that segment.
 // If options.AudienceId is set (legacy), lists contacts in that audience.
 // Otherwise lists global contacts.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) ListWithContext(ctx context.Context, options *ListContactsOptions) (ListContactsResponse, error) {
 	if options == nil {
 		options = &ListContactsOptions{}
@@ -243,7 +243,7 @@ func (s *ContactsSvcImpl) ListWithContext(ctx context.Context, options *ListCont
 // Remove removes a contact
 // If options.AudienceId is empty, removes a global contact. Otherwise removes an audience-specific contact.
 // The options.Id field can be either a contact ID or email address.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) Remove(options *RemoveContactOptions) (RemoveContactResponse, error) {
 	return s.RemoveWithContext(context.Background(), options)
 }
@@ -251,7 +251,7 @@ func (s *ContactsSvcImpl) Remove(options *RemoveContactOptions) (RemoveContactRe
 // RemoveWithContext removes a contact with context
 // If options.AudienceId is empty, removes a global contact. Otherwise removes an audience-specific contact.
 // The options.Id field can be either a contact ID or email address.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) RemoveWithContext(ctx context.Context, options *RemoveContactOptions) (RemoveContactResponse, error) {
 	if options == nil || options.Id == "" {
 		return RemoveContactResponse{}, errors.New("[ERROR]: Id is required")
@@ -287,7 +287,7 @@ func (s *ContactsSvcImpl) RemoveWithContext(ctx context.Context, options *Remove
 // Get retrieves a single contact.
 // This method can be used to retrieve a contact by either its ID or email address.
 // If options.AudienceId is empty, retrieves a global contact. Otherwise retrieves an audience-specific contact.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) Get(options *GetContactOptions) (Contact, error) {
 	return s.GetWithContext(context.Background(), options)
 }
@@ -295,7 +295,7 @@ func (s *ContactsSvcImpl) Get(options *GetContactOptions) (Contact, error) {
 // GetWithContext retrieves a single contact with context.
 // This method can be used to retrieve a contact by either its ID or email address.
 // If options.AudienceId is empty, retrieves a global contact. Otherwise retrieves an audience-specific contact.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) GetWithContext(ctx context.Context, options *GetContactOptions) (Contact, error) {
 	if options == nil || options.Id == "" {
 		return Contact{}, errors.New("[ERROR]: Id is required")
@@ -330,14 +330,14 @@ func (s *ContactsSvcImpl) GetWithContext(ctx context.Context, options *GetContac
 
 // Update updates an existing Contact based on the given params
 // Supports both global contacts (without audience_id) and audience-specific contacts.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) Update(params *UpdateContactRequest) (UpdateContactResponse, error) {
 	return s.UpdateWithContext(context.Background(), params)
 }
 
 // UpdateWithContext updates an existing Contact based on the given params with context
 // Supports both global contacts (without audience_id) and audience-specific contacts.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactsSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateContactRequest) (UpdateContactResponse, error) {
 	if params.Id == "" && params.Email == "" {
 		return UpdateContactResponse{}, &MissingRequiredFieldsError{message: "[ERROR]: Missing `id` or `email` field."}

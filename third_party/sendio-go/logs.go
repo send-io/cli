@@ -36,7 +36,7 @@ type LogsSvcImpl struct {
 }
 
 // GetWithContext retrieves a single log entry by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *LogsSvcImpl) GetWithContext(ctx context.Context, logId string) (Log, error) {
 	path := "logs/" + logId
 
@@ -61,7 +61,7 @@ func (s *LogsSvcImpl) Get(logId string) (Log, error) {
 }
 
 // ListWithOptions lists all logs with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *LogsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListLogsResponse, error) {
 	path := "logs" + buildPaginationQuery(options)
 
@@ -81,7 +81,7 @@ func (s *LogsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions)
 }
 
 // ListWithContext lists all logs
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *LogsSvcImpl) ListWithContext(ctx context.Context) (ListLogsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }

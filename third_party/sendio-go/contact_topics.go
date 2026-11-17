@@ -55,7 +55,7 @@ type ContactTopicsSvcImpl struct {
 
 // ListWithOptions retrieves a list of topics subscriptions for a contact with pagination options.
 // The id parameter can be either a contact ID or email address.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactTopicsSvcImpl) ListWithOptions(ctx context.Context, id string, options *ListOptions) (ListContactTopicsResponse, error) {
 	if id == "" {
 		return ListContactTopicsResponse{}, errors.New("[ERROR]: Contact ID or email is missing")
@@ -83,21 +83,21 @@ func (s *ContactTopicsSvcImpl) ListWithOptions(ctx context.Context, id string, o
 
 // ListWithContext retrieves a list of topics subscriptions for a contact.
 // The id parameter can be either a contact ID or email address.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactTopicsSvcImpl) ListWithContext(ctx context.Context, id string) (ListContactTopicsResponse, error) {
 	return s.ListWithOptions(ctx, id, nil)
 }
 
 // List retrieves a list of topics subscriptions for a contact.
 // The id parameter can be either a contact ID or email address.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactTopicsSvcImpl) List(id string) (ListContactTopicsResponse, error) {
 	return s.ListWithContext(context.Background(), id)
 }
 
 // UpdateWithContext updates topic subscriptions for a contact.
 // Either Id or Email must be provided in the params.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactTopicsSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateContactTopicsRequest) (UpdateContactTopicsResponse, error) {
 	if params.Id == "" && params.Email == "" {
 		return UpdateContactTopicsResponse{}, errors.New("[ERROR]: Contact ID or email is missing")
@@ -136,7 +136,7 @@ func (s *ContactTopicsSvcImpl) UpdateWithContext(ctx context.Context, params *Up
 
 // Update updates topic subscriptions for a contact.
 // Either Id or Email must be provided in the params.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactTopicsSvcImpl) Update(params *UpdateContactTopicsRequest) (UpdateContactTopicsResponse, error) {
 	return s.UpdateWithContext(context.Background(), params)
 }

@@ -61,6 +61,43 @@ func TestEmailsSendRequest(t *testing.T) {
 	}
 }
 
+// --transactional sends a transactional email by id: --var and --data are
+// its variables, and the fields it sets are refused before any request.
+func TestEmailsSendTransactional(t *testing.T) {
+	f := newFake(t)
+	f.json("POST /emails", 200, `{"id":"e1"}`)
+	h := newHarness(t, f.URL)
+	withKey(h)
+	tx := "tx_2hX9Yq1bVv0kq3W4m8sZJt1aB7c"
+	os.WriteFile(filepath.Join(h.home, "vars.json"), []byte(`{"EXPIRES":10}`), 0o644)
+	if code := h.run("emails", "send", "--transactional", tx, "--to", "a@x.dev", "--var", "CODE=123456", "--data", "@vars.json", "--tag", "priority=otp"); code != 0 {
+		t.Fatalf("exit %d: %s", code, h.errOut())
+	}
+	mustEqualJSON(t, f.last(t).Body, `{"transactional_id":"`+tx+`","to":["a@x.dev"],"variables":{"CODE":"123456","EXPIRES":10},"tags":[{"name":"priority","value":"otp"}]}`)
+
+	// Without variables there is no variables key.
+	if code := h.run("emails", "send", "--transactional", tx, "--to", "a@x.dev"); code != 0 {
+		t.Fatal(h.errOut())
+	}
+	mustEqualJSON(t, f.last(t).Body, `{"transactional_id":"`+tx+`","to":["a@x.dev"]}`)
+
+	sent := len(f.requests())
+	for _, extra := range [][]string{
+		{"--template", "welcome"}, {"--from", "a@acme.dev"}, {"--subject", "Hi"}, {"--reply-to", "r@acme.dev"}, {"--html", "<p>x</p>"}, {"--text", "x"},
+	} {
+		args := append([]string{"emails", "send", "--transactional", tx, "--to", "a@x.dev"}, extra...)
+		if code := h.run(args...); code != 2 {
+			t.Errorf("%v: exit %d, want 2 (usage)", extra, code)
+		}
+	}
+	if len(f.requests()) != sent {
+		t.Fatalf("a refused combination still sent a request")
+	}
+	if code := h.run("emails", "send", "--from", "a@acme.dev", "--to", "a@x.dev", "--subject", "x", "--text", "y", "--var", "a=b"); code != 2 {
+		t.Fatalf("--var without --template or --transactional: exit %d", code)
+	}
+}
+
 func TestEmailsSendWaitDelivered(t *testing.T) {
 	f := newFake(t)
 	f.json("POST /emails", 200, `{"id":"e1"}`)

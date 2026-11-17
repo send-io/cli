@@ -17,13 +17,13 @@ curl -fsSL https://app.send.io/install.sh | sh              # macOS, Linux
 irm https://app.send.io/install.ps1 | iex                   # Windows PowerShell
 ```
 
-This works once a release is published there. From source
-(Go 1.23+):
+With Node.js: `npm i -g @sendio/cli`, or `npx @sendio/cli <command>` without
+installing. From source (Go 1.23+):
 
 ```sh
 git clone <this repo> && cd <repo>/cli
 CGO_ENABLED=0 go build -ldflags "-s -w \
-  -X send.io/cli/internal/build.Version=0.1.0 \
+  -X send.io/cli/internal/build.Version=0.2.0 \
   -X send.io/cli/internal/build.Commit=$(git rev-parse --short HEAD) \
   -X send.io/cli/internal/build.Date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   -o sendio ./cmd/sendio
@@ -46,7 +46,8 @@ sendio doctor
 More:
 
 ```sh
-sendio emails send --template welcome --var name=Ada --to ada@example.com
+sendio emails send --transactional tx_... --var CODE=123456 --to ada@example.com
+sendio transactional create --name "Sign-in code" --template-id signin-code --from "Acme <hi@mail.example.com>" --subject "Your code is {{CODE}}"
 sendio emails send ... --html @mail.html --attach ./invoice.pdf --scheduled-at "in 1h" --idempotency-key auto
 sendio emails batch --file emails.ndjson
 sendio emails get <id>        sendio emails events <id>       sendio emails list --all
@@ -64,7 +65,7 @@ sendio open logs
 Every API operation has a command (`sendio <resource> <verb>`), generated from
 the same registry as the send.io MCP server's tools, so the CLI, the MCP
 server and the API cannot drift apart. Resources: `emails` (+`received`),
-`templates` (+`versions`), `contacts` (+`segments`, `topics`, `imports`),
+`templates` (+`versions`), `transactional`, `contacts` (+`segments`, `topics`, `imports`),
 `contact-properties`, `segments`, `topics`, `broadcasts`, `automations`
 (+`runs`, `templates`), `events`, `domains`, `api-keys`, `webhooks`, `suppressions`,
 `logs`, `inboxes` (+`threads`, `messages`, `drafts`). Flags map to API fields
@@ -315,19 +316,20 @@ next to it in `internal/cli`. New top-level commands (streaming ones such as
 
 ## Packaging
 
-Nothing is published to package registries yet (Homebrew, Scoop, npm, ghcr). `cli/.goreleaser.yaml` builds darwin/linux/windows
+Releases are on GitHub (`send-io/cli`) and npm (`@sendio/cli`, since 0.1.0); Homebrew, Scoop and ghcr are not
+published yet. `cli/.goreleaser.yaml` builds darwin/linux/windows
 × amd64/arm64 (CGO off, version/commit/date ldflags), archives, checksums,
 deb/rpm, a Homebrew cask (`send-io/homebrew-tap`), a Scoop manifest and a
 `ghcr.io/send-io/cli` image (owners are placeholders; signing and
 notarization are commented out until there are credentials):
 
 ```sh
-go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean
+go run github.com/goreleaser/goreleaser/v2@latest release --snapshot --clean   # at a tag, for the tag's version: release --clean --skip=publish
 node scripts/npm-packages.mjs   # dist/ → dist/npm: @sendio/cli + @sendio/cli-<os>-<arch>
 ```
 
 - `install/install.sh` (POSIX, checksum-verified, installs to
   `~/.sendio/bin`) and `install/install.ps1` (Windows).
-- `npm/`: the `@sendio/cli` wrapper (the npm name `sendio` is the Node SDK)
+- `npm/`: the `@sendio/cli` wrapper (the Node SDK is `@sendio/node`)
   with esbuild-style per-platform optional dependencies and a bin shim.
 - `action/`: the `setup-sendio` GitHub Action skeleton.

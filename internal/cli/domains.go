@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	sendio "github.com/send-io/sendio-go"
 	"github.com/spf13/cobra"
-	sendio "send.io/sendio-go"
 
 	"send.io/cli/internal/api"
 	"send.io/cli/internal/out"
@@ -80,6 +80,7 @@ API: POST /domains, GET /domains/{id}/domain-connect`,
 					}
 				}
 				fmt.Fprintln(w)
+				a.printZone(w, str(dom, "dns_zone"))
 				a.printRecords(w, dom["records"])
 				fmt.Fprintf(w, "\nThen run: sendio domains verify %s --watch\n", str(dom, "id"))
 			})
@@ -145,18 +146,36 @@ func (a *App) domainConnect(ctx context.Context, c *api.Client, id string) map[s
 	return m
 }
 
+// printZone prints the DNS zone the record hosts are relative to (SENDIO-341).
+func (a *App) printZone(w io.Writer, zone string) {
+	if zone != "" {
+		fmt.Fprintf(w, "DNS zone: %s\n", zone)
+	}
+}
+
+// recordHost is what to type into the DNS provider: the record name relative
+// to the domain's DNS zone. For mail.example.com in the zone example.com the
+// return path is "send.mail", not "send". An API that does not return host
+// yet falls back to name (relative to the domain).
+func recordHost(m map[string]any) string {
+	if h := str(m, "host"); h != "" {
+		return h
+	}
+	return str(m, "name")
+}
+
 func (a *App) printRecords(w io.Writer, records any) {
 	l, _ := records.([]any)
 	rows := [][]string{}
 	for _, r := range l {
 		m, _ := r.(map[string]any)
-		rows = append(rows, []string{str(m, "record"), str(m, "type"), str(m, "name"), out.Cell(m["value"], 0), dash(str(m, "priority")), a.statusCell(str(m, "status"))})
+		rows = append(rows, []string{str(m, "record"), str(m, "type"), recordHost(m), out.Cell(m["value"], 0), dash(str(m, "priority")), a.statusCell(str(m, "status"))})
 	}
 	if len(rows) == 0 {
 		fmt.Fprintln(w, a.P().S().Dim.Render("No DNS records returned."))
 		return
 	}
-	a.P().Table(w, []string{"record", "type", "name", "value", "priority", "status"}, rows)
+	a.P().Table(w, []string{"record", "type", "host", "value", "priority", "status"}, rows)
 }
 
 func (a *App) statusCell(s string) string {
@@ -183,9 +202,19 @@ func domainView(d sendio.Domain) map[string]any {
 		if r.Priority != "" {
 			m["priority"] = r.Priority.String()
 		}
+		if r.Host != "" {
+			m["host"] = r.Host
+		}
+		if r.FullName != "" {
+			m["full_name"] = r.FullName
+		}
 		recs = append(recs, m)
 	}
-	return map[string]any{"id": d.Id, "name": d.Name, "status": d.Status, "region": d.Region, "records": recs}
+	v := map[string]any{"id": d.Id, "name": d.Name, "status": d.Status, "region": d.Region, "records": recs}
+	if d.DnsZone != "" {
+		v["dns_zone"] = d.DnsZone
+	}
+	return v
 }
 
 func recordSignature(d map[string]any) string {
@@ -225,6 +254,7 @@ func (a *App) verifyDomain(ctx context.Context, id string, watch bool, timeout, 
 				} else {
 					fmt.Fprintf(w, "%s is %s.\n", d.Name, a.statusCell(d.Status))
 				}
+				a.printZone(w, d.DnsZone)
 				a.printRecords(w, view["records"])
 			})
 		}
@@ -238,6 +268,7 @@ func (a *App) verifyDomain(ctx context.Context, id string, watch bool, timeout, 
 				}
 			} else if !p.Quiet {
 				fmt.Fprintf(a.Stdout, "\n%s %s is %s (%s elapsed)\n", p.S().Dim.Render(a.now().Format("15:04:05")), d.Name, a.statusCell(d.Status), a.now().Sub(start).Round(time.Second))
+				a.printZone(a.Stdout, d.DnsZone)
 				a.printRecords(a.Stdout, view["records"])
 			}
 		}

@@ -110,6 +110,8 @@ type CreateDomainResponse struct {
 	ClickTracking     bool                `json:"click_tracking,omitempty"`
 	TrackingSubdomain string              `json:"tracking_subdomain,omitempty"`
 	Capabilities      *DomainCapabilities `json:"capabilities,omitempty"`
+	// DnsZone is the DNS zone the domain lives in; record hosts are relative to it.
+	DnsZone string `json:"dns_zone,omitempty"`
 }
 
 type ListDomainsResponse struct {
@@ -177,6 +179,8 @@ type Domain struct {
 	ClickTracking     bool                `json:"click_tracking,omitempty"`
 	TrackingSubdomain string              `json:"tracking_subdomain,omitempty"`
 	Capabilities      *DomainCapabilities `json:"capabilities,omitempty"`
+	// DnsZone is the DNS zone the domain lives in; record hosts are relative to it.
+	DnsZone string `json:"dns_zone,omitempty"`
 }
 
 type Record struct {
@@ -187,10 +191,15 @@ type Record struct {
 	Status   string      `json:"status"`
 	Value    string      `json:"value"`
 	Priority json.Number `json:"priority,omitempty"`
+	// Host is the record name relative to the domain's DNS zone (DnsZone):
+	// what to type into the DNS provider. Name stays relative to the domain.
+	Host string `json:"host,omitempty"`
+	// FullName is the complete record name, such as send.mail.acme.com.
+	FullName string `json:"full_name,omitempty"`
 }
 
 // UpdateWithContext updates an existing Domain entry based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) UpdateWithContext(ctx context.Context, domainId string, params *UpdateDomainRequest) (Domain, error) {
 	path := "domains/" + domainId
 
@@ -218,7 +227,7 @@ func (s *DomainsSvcImpl) Update(domainId string, params *UpdateDomainRequest) (D
 }
 
 // CreateWithContext creates a new Domain entry based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) CreateWithContext(ctx context.Context, params *CreateDomainRequest) (CreateDomainResponse, error) {
 	path := "domains"
 
@@ -242,13 +251,13 @@ func (s *DomainsSvcImpl) CreateWithContext(ctx context.Context, params *CreateDo
 }
 
 // Create creates a new Domain entry based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) Create(params *CreateDomainRequest) (CreateDomainResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // VerifyWithContext verifies a given domain Id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) VerifyWithContext(ctx context.Context, domainId string) (bool, error) {
 	path := "domains/" + domainId + "/verify"
 
@@ -269,13 +278,13 @@ func (s *DomainsSvcImpl) VerifyWithContext(ctx context.Context, domainId string)
 }
 
 // Verify verifies a given domain Id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) Verify(domainId string) (bool, error) {
 	return s.VerifyWithContext(context.Background(), domainId)
 }
 
 // ListWithOptions returns the list of all domains with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListDomainsResponse, error) {
 	path := "domains" + buildPaginationQuery(options)
 
@@ -298,19 +307,19 @@ func (s *DomainsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptio
 }
 
 // ListWithContext returns the list of all domains
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) ListWithContext(ctx context.Context) (ListDomainsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
 
 // List returns the list of all domains
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) List() (ListDomainsResponse, error) {
 	return s.ListWithContext(context.Background())
 }
 
 // RemoveWithContext removes a given domain entry by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) RemoveWithContext(ctx context.Context, domainId string) (bool, error) {
 	path := "domains/" + domainId
 
@@ -331,13 +340,13 @@ func (s *DomainsSvcImpl) RemoveWithContext(ctx context.Context, domainId string)
 }
 
 // Remove removes a given domain entry by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) Remove(domainId string) (bool, error) {
 	return s.RemoveWithContext(context.Background(), domainId)
 }
 
 // GetWithContext retrieves a domain object
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) GetWithContext(ctx context.Context, domainId string) (Domain, error) {
 	path := "domains/" + domainId
 
@@ -360,7 +369,7 @@ func (s *DomainsSvcImpl) GetWithContext(ctx context.Context, domainId string) (D
 }
 
 // Get retrieves a domain object
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *DomainsSvcImpl) Get(domainId string) (Domain, error) {
 	return s.GetWithContext(context.Background(), domainId)
 }

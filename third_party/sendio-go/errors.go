@@ -38,11 +38,34 @@ func (e *APIError) Error() string {
 	return "[ERROR]: " + e.Message
 }
 
+// API error names a caller may want to handle by name: compare with
+// APIError.Name, or RateLimitError.Name for the 429s. The API documents the
+// full list at https://developer.send.io/docs/api#errors.
+const (
+	// ErrorNameInsufficientCredits (402): the credit balance does not cover
+	// the send. Nothing was sent; buy credits, then retry.
+	ErrorNameInsufficientCredits = "insufficient_credits"
+	// ErrorNameRateLimitExceeded (429): too many requests per second.
+	ErrorNameRateLimitExceeded = "rate_limit_exceeded"
+	// ErrorNameDailyQuotaExceeded (429): the account's daily sending limit.
+	ErrorNameDailyQuotaExceeded = "daily_quota_exceeded"
+	// ErrorNameMonthlyQuotaExceeded (429): the account's monthly sending limit.
+	ErrorNameMonthlyQuotaExceeded = "monthly_quota_exceeded"
+	// ErrorNameSubaccountDailyQuotaExceeded (429): a subaccount's own daily limit.
+	ErrorNameSubaccountDailyQuotaExceeded = "subaccount_daily_quota_exceeded"
+	// ErrorNameSubaccountMonthlyQuotaExceeded (429): a subaccount's own monthly limit.
+	ErrorNameSubaccountMonthlyQuotaExceeded = "subaccount_monthly_quota_exceeded"
+)
+
 // ErrRateLimit is a sentinel error for rate limit detection with errors.Is
 var ErrRateLimit = errors.New("rate limit exceeded")
 
 // RateLimitError represents a rate limit error with metadata from response headers
 type RateLimitError struct {
+	// Name is the API's error name: rate_limit_exceeded, or a quota name such
+	// as daily_quota_exceeded or subaccount_monthly_quota_exceeded.
+	Name string
+
 	// Message is the error message from the API
 	Message string
 
@@ -182,4 +205,15 @@ var (
 	ErrFailedToCreateMailboxesUpdateRequest        = errors.New("[ERROR]: Failed to create Mailboxes.Update request")
 	ErrFailedToCreateMailboxesResetPasswordRequest = errors.New("[ERROR]: Failed to create Mailboxes.ResetPassword request")
 	ErrFailedToCreateMailboxesRemoveRequest        = errors.New("[ERROR]: Failed to create Mailboxes.Remove request")
+)
+
+// TransactionalSvc errors
+var (
+	ErrFailedToCreateTransactionalCreateRequest   = errors.New("[ERROR]: Failed to create Transactional.Create request")
+	ErrFailedToCreateTransactionalListRequest     = errors.New("[ERROR]: Failed to create Transactional.List request")
+	ErrFailedToCreateTransactionalGetRequest      = errors.New("[ERROR]: Failed to create Transactional.Get request")
+	ErrFailedToCreateTransactionalUpdateRequest   = errors.New("[ERROR]: Failed to create Transactional.Update request")
+	ErrFailedToCreateTransactionalRemoveRequest   = errors.New("[ERROR]: Failed to create Transactional.Remove request")
+	ErrFailedToCreateTransactionalSendTestRequest = errors.New("[ERROR]: Failed to create Transactional.SendTest request")
+	ErrFailedToCreateTransactionalStatsRequest    = errors.New("[ERROR]: Failed to create Transactional.Stats request")
 )

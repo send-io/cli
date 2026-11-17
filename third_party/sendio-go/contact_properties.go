@@ -67,7 +67,7 @@ type ListContactPropertiesResponse struct {
 }
 
 // CreateWithContext creates a new contact property based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) CreateWithContext(ctx context.Context, params *CreateContactPropertyRequest) (CreateContactPropertyResponse, error) {
 	if params.Key == "" {
 		return CreateContactPropertyResponse{}, errors.New("[ERROR]: Key is missing")
@@ -99,13 +99,13 @@ func (s *ContactPropertiesSvcImpl) CreateWithContext(ctx context.Context, params
 }
 
 // Create creates a new contact property based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) Create(params *CreateContactPropertyRequest) (CreateContactPropertyResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // ListWithOptions returns the list of all contact properties with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListContactPropertiesResponse, error) {
 	path := "contact-properties" + buildPaginationQuery(options)
 
@@ -128,19 +128,19 @@ func (s *ContactPropertiesSvcImpl) ListWithOptions(ctx context.Context, options 
 }
 
 // ListWithContext returns the list of all contact properties
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) ListWithContext(ctx context.Context) (ListContactPropertiesResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
 
 // List returns the list of all contact properties
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) List() (ListContactPropertiesResponse, error) {
 	return s.ListWithContext(context.Background())
 }
 
 // GetWithContext retrieves a single contact property by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) GetWithContext(ctx context.Context, id string) (ContactProperty, error) {
 	if id == "" {
 		return ContactProperty{}, errors.New("[ERROR]: ID is missing")
@@ -167,13 +167,13 @@ func (s *ContactPropertiesSvcImpl) GetWithContext(ctx context.Context, id string
 }
 
 // Get retrieves a single contact property by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) Get(id string) (ContactProperty, error) {
 	return s.GetWithContext(context.Background(), id)
 }
 
 // UpdateWithContext updates an existing contact property based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateContactPropertyRequest) (UpdateContactPropertyResponse, error) {
 	if params.Id == "" {
 		return UpdateContactPropertyResponse{}, errors.New("[ERROR]: ID is missing")
@@ -201,13 +201,13 @@ func (s *ContactPropertiesSvcImpl) UpdateWithContext(ctx context.Context, params
 }
 
 // Update updates an existing contact property based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) Update(params *UpdateContactPropertyRequest) (UpdateContactPropertyResponse, error) {
 	return s.UpdateWithContext(context.Background(), params)
 }
 
 // RemoveWithContext removes a contact property by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) RemoveWithContext(ctx context.Context, id string) (RemoveContactPropertyResponse, error) {
 	if id == "" {
 		return RemoveContactPropertyResponse{}, errors.New("[ERROR]: ID is missing")
@@ -234,7 +234,7 @@ func (s *ContactPropertiesSvcImpl) RemoveWithContext(ctx context.Context, id str
 }
 
 // Remove removes a contact property by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactPropertiesSvcImpl) Remove(id string) (RemoveContactPropertyResponse, error) {
 	return s.RemoveWithContext(context.Background(), id)
 }

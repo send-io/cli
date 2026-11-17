@@ -80,7 +80,7 @@ type TopicsSvcImpl struct {
 }
 
 // CreateWithContext creates a new topic with the given parameters
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) CreateWithContext(ctx context.Context, params *CreateTopicRequest) (*CreateTopicResponse, error) {
 	path := "topics"
 
@@ -104,13 +104,13 @@ func (s *TopicsSvcImpl) CreateWithContext(ctx context.Context, params *CreateTop
 }
 
 // Create creates a new topic with the given parameters
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) Create(params *CreateTopicRequest) (*CreateTopicResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // GetWithContext retrieves a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) GetWithContext(ctx context.Context, topicId string) (*Topic, error) {
 	path := "topics/" + topicId
 
@@ -134,13 +134,13 @@ func (s *TopicsSvcImpl) GetWithContext(ctx context.Context, topicId string) (*To
 }
 
 // Get retrieves a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) Get(topicId string) (*Topic, error) {
 	return s.GetWithContext(context.Background(), topicId)
 }
 
 // ListWithContext retrieves a list of topics with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) ListWithContext(ctx context.Context, options *ListOptions) (*ListTopicsResponse, error) {
 	path := "topics" + buildPaginationQuery(options)
 
@@ -164,13 +164,13 @@ func (s *TopicsSvcImpl) ListWithContext(ctx context.Context, options *ListOption
 }
 
 // List retrieves a list of topics with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) List(options *ListOptions) (*ListTopicsResponse, error) {
 	return s.ListWithContext(context.Background(), options)
 }
 
 // UpdateWithContext updates a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) UpdateWithContext(ctx context.Context, topicId string, params *UpdateTopicRequest) (*UpdateTopicResponse, error) {
 	path := "topics/" + topicId
 
@@ -194,13 +194,13 @@ func (s *TopicsSvcImpl) UpdateWithContext(ctx context.Context, topicId string, p
 }
 
 // Update updates a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) Update(topicId string, params *UpdateTopicRequest) (*UpdateTopicResponse, error) {
 	return s.UpdateWithContext(context.Background(), topicId, params)
 }
 
 // RemoveWithContext removes a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) RemoveWithContext(ctx context.Context, topicId string) (*RemoveTopicResponse, error) {
 	path := "topics/" + topicId
 
@@ -224,7 +224,7 @@ func (s *TopicsSvcImpl) RemoveWithContext(ctx context.Context, topicId string) (
 }
 
 // Remove removes a topic by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TopicsSvcImpl) Remove(topicId string) (*RemoveTopicResponse, error) {
 	return s.RemoveWithContext(context.Background(), topicId)
 }

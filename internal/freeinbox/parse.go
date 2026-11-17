@@ -12,14 +12,34 @@ import (
 	"net/mail"
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 )
 
 // riskyExt are the attachment extensions clients warn about (PROTOCOL.md).
-var riskyExt = map[string]bool{
-	"exe": true, "scr": true, "bat": true, "cmd": true, "com": true, "pif": true, "js": true, "jse": true,
-	"vbs": true, "vbe": true, "wsf": true, "hta": true, "msi": true, "ps1": true, "jar": true, "lnk": true,
-	"iso": true, "img": true, "docm": true, "xlsm": true, "pptm": true, "dotm": true,
+//
+// KEEP IN SYNC: same list as RISKY_EXTENSIONS in
+// frontend/console/src/modules/free-inbox/core.ts and
+// sdks/node/src/inbox/core.ts (TestRiskyExtMatchesConsole checks it).
+var riskyExt = setOf(
+	"exe", "scr", "bat", "cmd", "com", "pif", "js", "jse",
+	"vbs", "vbe", "wsf", "hta", "msi", "ps1", "jar", "lnk",
+	"iso", "img", "docm", "xlsm", "pptm", "dotm",
+	// Open in a browser or viewer and can run script or phish (SENDIO-695).
+	"html", "htm", "xhtml", "shtml", "mht", "mhtml", "svg",
+	// macOS and Linux installers and scripts.
+	"sh", "bash", "command", "dmg", "pkg", "app", "scpt", "applescript", "apk",
+	// More Windows script and installer types.
+	"vb", "wsh", "ps1xml", "psm1", "reg", "cpl", "msp", "msix", "appx",
+	"appref-ms", "xll", "xlam", "vhd", "vhdx",
+)
+
+func setOf(exts ...string) map[string]bool {
+	m := make(map[string]bool, len(exts))
+	for _, e := range exts {
+		m[e] = true
+	}
+	return m
 }
 
 func ext(name string) string {
@@ -29,7 +49,22 @@ func ext(name string) string {
 // RiskyName reports whether a filename has a risky extension.
 func RiskyName(name string) bool { return riskyExt[ext(name)] }
 
-var riskyNameInBytes = regexp.MustCompile(`(?i)[\w\-. ]+\.(exe|scr|bat|cmd|com|pif|js|jse|vbs|vbe|wsf|hta|msi|ps1|jar|lnk|iso|img|docm|xlsm|pptm|dotm)\x00`)
+// riskyNameInBytes finds a NUL-terminated stored name with a risky extension
+// (7z and some rar headers). Built from riskyExt so the two never drift.
+var riskyNameInBytes = func() *regexp.Regexp {
+	alts := make([]string, 0, len(riskyExt))
+	for e := range riskyExt {
+		alts = append(alts, regexp.QuoteMeta(e))
+	}
+	// Sorted so the pattern is deterministic.
+	sort.Slice(alts, func(i, j int) bool {
+		if len(alts[i]) != len(alts[j]) {
+			return len(alts[i]) > len(alts[j])
+		}
+		return alts[i] < alts[j]
+	})
+	return regexp.MustCompile(`(?i)[\w\-. ]+\.(?:` + strings.Join(alts, "|") + `)\x00`)
+}()
 
 // Risky decides whether an attachment is risky: a risky extension, a
 // Windows executable (starts with "MZ"), or an archive (zip, rar, 7z) that

@@ -55,7 +55,7 @@ type ListContactSegmentsResponse struct {
 }
 
 // AddWithContext adds a contact to a segment
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) AddWithContext(ctx context.Context, params *AddContactSegmentRequest) (AddContactSegmentResponse, error) {
 	if params.SegmentId == "" {
 		return AddContactSegmentResponse{}, errors.New("[ERROR]: SegmentId is required")
@@ -93,13 +93,13 @@ func (s *ContactSegmentsSvcImpl) AddWithContext(ctx context.Context, params *Add
 }
 
 // Add adds a contact to a segment
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) Add(params *AddContactSegmentRequest) (AddContactSegmentResponse, error) {
 	return s.AddWithContext(context.Background(), params)
 }
 
 // RemoveWithContext removes a contact from a segment
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) RemoveWithContext(ctx context.Context, params *RemoveContactSegmentRequest) (RemoveContactSegmentResponse, error) {
 	if params.SegmentId == "" {
 		return RemoveContactSegmentResponse{}, errors.New("[ERROR]: SegmentId is required")
@@ -136,13 +136,13 @@ func (s *ContactSegmentsSvcImpl) RemoveWithContext(ctx context.Context, params *
 }
 
 // Remove removes a contact from a segment
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) Remove(params *RemoveContactSegmentRequest) (RemoveContactSegmentResponse, error) {
 	return s.RemoveWithContext(context.Background(), params)
 }
 
 // ListWithOptions returns the list of all segments for a contact with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) ListWithOptions(ctx context.Context, params *ListContactSegmentsRequest, options *ListOptions) (ListContactSegmentsResponse, error) {
 	if params.ContactId == "" && params.Email == "" {
 		return ListContactSegmentsResponse{}, errors.New("[ERROR]: Either ContactId or Email must be provided")
@@ -175,13 +175,13 @@ func (s *ContactSegmentsSvcImpl) ListWithOptions(ctx context.Context, params *Li
 }
 
 // ListWithContext returns the list of all segments for a contact
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) ListWithContext(ctx context.Context, params *ListContactSegmentsRequest) (ListContactSegmentsResponse, error) {
 	return s.ListWithOptions(ctx, params, nil)
 }
 
 // List returns the list of all segments for a contact
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactSegmentsSvcImpl) List(params *ListContactSegmentsRequest) (ListContactSegmentsResponse, error) {
 	return s.ListWithContext(context.Background(), params)
 }

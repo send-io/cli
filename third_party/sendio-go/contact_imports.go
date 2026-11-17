@@ -96,13 +96,13 @@ type ContactImportsSvcImpl struct {
 }
 
 // Create creates a new contact import from a CSV file.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) Create(params *CreateContactImportRequest) (CreateContactImportResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // CreateWithContext creates a new contact import from a CSV file with context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) CreateWithContext(ctx context.Context, params *CreateContactImportRequest) (CreateContactImportResponse, error) {
 	if params == nil || len(params.File) == 0 {
 		return CreateContactImportResponse{}, errors.New("[ERROR]: File is required")
@@ -153,13 +153,13 @@ func (s *ContactImportsSvcImpl) CreateWithContext(ctx context.Context, params *C
 }
 
 // Get retrieves a single contact import by ID.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) Get(id string) (ContactImport, error) {
 	return s.GetWithContext(context.Background(), id)
 }
 
 // GetWithContext retrieves a single contact import by ID with context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) GetWithContext(ctx context.Context, id string) (ContactImport, error) {
 	if id == "" {
 		return ContactImport{}, errors.New("[ERROR]: Id is required")
@@ -179,13 +179,13 @@ func (s *ContactImportsSvcImpl) GetWithContext(ctx context.Context, id string) (
 }
 
 // List retrieves a list of contact imports.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) List(options *ListContactImportsOptions) (ListContactImportsResponse, error) {
 	return s.ListWithContext(context.Background(), options)
 }
 
 // ListWithContext retrieves a list of contact imports with context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ContactImportsSvcImpl) ListWithContext(ctx context.Context, options *ListContactImportsOptions) (ListContactImportsResponse, error) {
 	if options == nil {
 		options = &ListContactImportsOptions{}

@@ -1,7 +1,7 @@
 [
   {
     "name": "send-email",
-    "description": "Send an email (inline html/text, or a published template with its variables).",
+    "description": "Send an email: a transactional email by id (transactional_id, with to and variables: the way to send a template), or inline html/text.",
     "method": "POST",
     "path": "/emails",
     "family": "Emails",
@@ -27,7 +27,7 @@
       {
         "name": "from",
         "type": "string",
-        "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address."
+        "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address. Not with transactional_id (it sets the sender)."
       },
       {
         "name": "headers",
@@ -56,7 +56,8 @@
       },
       {
         "name": "subject",
-        "type": "string"
+        "type": "string",
+        "description": "Subject line. Not with transactional_id."
       },
       {
         "name": "tags",
@@ -67,7 +68,7 @@
       {
         "name": "template",
         "type": "object",
-        "description": "Send a published template: {id (id or alias), variables?}."
+        "description": "Deprecated: send a template with transactional_id instead (create one with create-transactional-email). Still accepted for now: {id (id or alias), variables?}."
       },
       {
         "name": "text",
@@ -84,6 +85,26 @@
         "name": "topic_id",
         "type": "string",
         "description": "Topic the email belongs to (unsubscribed contacts are skipped)."
+      },
+      {
+        "name": "track_clicks",
+        "type": "boolean",
+        "description": "Click tracking for this email (default: the domain's setting, or the transactional email's)."
+      },
+      {
+        "name": "track_opens",
+        "type": "boolean",
+        "description": "Open tracking for this email (default: the domain's setting, or the transactional email's)."
+      },
+      {
+        "name": "transactional_id",
+        "type": "string",
+        "description": "Send a transactional email (tx_...): it sets the sender, subject, reply-to, preview text and content (its template's published version). Do not pass from, subject, replyTo, html, text or template with it."
+      },
+      {
+        "name": "variables",
+        "type": "object",
+        "description": "With transactional_id: the template's variable values, {key: value}."
       }
     ],
     "input_schema": {
@@ -111,7 +132,7 @@
           "type": "array"
         },
         "from": {
-          "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address.",
+          "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or a bare address. Not with transactional_id (it sets the sender).",
           "type": "string"
         },
         "headers": {
@@ -137,6 +158,7 @@
           "type": "string"
         },
         "subject": {
+          "description": "Subject line. Not with transactional_id.",
           "type": "string"
         },
         "tags": {
@@ -147,7 +169,7 @@
           "type": "array"
         },
         "template": {
-          "description": "Send a published template: {id (id or alias), variables?}.",
+          "description": "Deprecated: send a template with transactional_id instead (create one with create-transactional-email). Still accepted for now: {id (id or alias), variables?}.",
           "type": "object"
         },
         "text": {
@@ -163,6 +185,22 @@
         "topic_id": {
           "description": "Topic the email belongs to (unsubscribed contacts are skipped).",
           "type": "string"
+        },
+        "track_clicks": {
+          "description": "Click tracking for this email (default: the domain's setting, or the transactional email's).",
+          "type": "boolean"
+        },
+        "track_opens": {
+          "description": "Open tracking for this email (default: the domain's setting, or the transactional email's).",
+          "type": "boolean"
+        },
+        "transactional_id": {
+          "description": "Send a transactional email (tx_...): it sets the sender, subject, reply-to, preview text and content (its template's published version). Do not pass from, subject, replyTo, html, text or template with it.",
+          "type": "string"
+        },
+        "variables": {
+          "description": "With transactional_id: the template's variable values, {key: value}.",
+          "type": "object"
         }
       },
       "required": [
@@ -214,7 +252,7 @@
   },
   {
     "name": "list-emails",
-    "description": "List sent emails, newest first.",
+    "description": "List sent emails, newest first, optionally only those of one transactional email.",
     "method": "GET",
     "path": "/emails",
     "family": "Emails",
@@ -233,6 +271,11 @@
         "name": "limit",
         "type": "integer",
         "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "transactional_id",
+        "type": "string",
+        "description": "Only emails sent from this transactional email (tx_...)."
       }
     ],
     "input_schema": {
@@ -251,6 +294,10 @@
           "maximum": 100,
           "minimum": 1,
           "type": "integer"
+        },
+        "transactional_id": {
+          "description": "Only emails sent from this transactional email (tx_...).",
+          "type": "string"
         }
       },
       "required": [],
@@ -589,7 +636,7 @@
   },
   {
     "name": "create-template",
-    "description": "Create a template (saved as a draft until published).",
+    "description": "Create a template: an email design, saved as a draft until published (From and subject are optional defaults).",
     "method": "POST",
     "path": "/templates",
     "family": "Templates",
@@ -602,7 +649,7 @@
       {
         "name": "from",
         "type": "string",
-        "description": "Default sender for sends that use the template."
+        "description": "Optional default sender for sends that do not pass one (a template is a design: it can be published without it)."
       },
       {
         "name": "html",
@@ -626,7 +673,8 @@
       },
       {
         "name": "subject",
-        "type": "string"
+        "type": "string",
+        "description": "Optional default subject for sends that do not pass one."
       },
       {
         "name": "template_engine",
@@ -666,7 +714,7 @@
           "type": "string"
         },
         "from": {
-          "description": "Default sender for sends that use the template.",
+          "description": "Optional default sender for sends that do not pass one (a template is a design: it can be published without it).",
           "type": "string"
         },
         "html": {
@@ -686,6 +734,7 @@
           "type": "array"
         },
         "subject": {
+          "description": "Optional default subject for sends that do not pass one.",
           "type": "string"
         },
         "template_engine": {
@@ -810,7 +859,7 @@
       {
         "name": "from",
         "type": "string",
-        "description": "Default sender for sends that use the template."
+        "description": "Optional default sender for sends that do not pass one (a template is a design: it can be published without it)."
       },
       {
         "name": "html",
@@ -838,7 +887,8 @@
       },
       {
         "name": "subject",
-        "type": "string"
+        "type": "string",
+        "description": "Optional default subject for sends that do not pass one."
       },
       {
         "name": "template_engine",
@@ -878,7 +928,7 @@
           "type": "string"
         },
         "from": {
-          "description": "Default sender for sends that use the template.",
+          "description": "Optional default sender for sends that do not pass one (a template is a design: it can be published without it).",
           "type": "string"
         },
         "html": {
@@ -902,6 +952,7 @@
           "type": "array"
         },
         "subject": {
+          "description": "Optional default subject for sends that do not pass one.",
           "type": "string"
         },
         "template_engine": {
@@ -939,7 +990,7 @@
   },
   {
     "name": "publish-template",
-    "description": "Publish a template's draft so sends use it.",
+    "description": "Publish a template's draft so sends, transactional emails and new broadcasts use it (it needs content; From and subject are optional).",
     "method": "POST",
     "path": "/templates/{id}/publish",
     "family": "Templates",
@@ -956,6 +1007,43 @@
       "properties": {
         "id": {
           "description": "The template id or alias.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-template-publish-impact",
+    "description": "Check what publishing a template version would change: new required variables, removed defaults, the transactional emails and automations that use it.",
+    "method": "GET",
+    "path": "/templates/{id}/publish-impact",
+    "family": "Templates",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The template id or alias.",
+        "required": true
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "The version id or number to check (default: the draft)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The template id or alias.",
+          "type": "string"
+        },
+        "version": {
+          "description": "The version id or number to check (default: the draft).",
           "type": "string"
         }
       },
@@ -1092,10 +1180,21 @@
     "family": "Templates",
     "params": [
       {
+        "name": "from",
+        "type": "string",
+        "description": "Sender for the test, on a verified domain (required when the template has no default From)."
+      },
+      {
         "name": "id",
         "type": "string",
         "description": "The template id or alias.",
         "required": true
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses for the test."
       },
       {
         "name": "to",
@@ -1113,9 +1212,20 @@
     "input_schema": {
       "additionalProperties": false,
       "properties": {
+        "from": {
+          "description": "Sender for the test, on a verified domain (required when the template has no default From).",
+          "type": "string"
+        },
         "id": {
           "description": "The template id or alias.",
           "type": "string"
+        },
+        "reply_to": {
+          "description": "Reply-To addresses for the test.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "to": {
           "description": "1 to 5 recipient addresses.",
@@ -1341,6 +1451,490 @@
       "required": [
         "id",
         "version"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "create-transactional-email",
+    "description": "Create a transactional email: a named send of a published template with its own From, subject and tracking, sent by id with send-email's transactional_id.",
+    "method": "POST",
+    "path": "/transactional",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or an address on a verified sending domain.",
+        "required": true
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "string",
+        "description": "Idempotency-Key header: a retry with the same key returns the first answer."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Your name for it, 1 to 255 characters.",
+        "required": true
+      },
+      {
+        "name": "preview_text",
+        "type": "string",
+        "description": "Inbox preview text (empty: none)."
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses (at most 50)."
+      },
+      {
+        "name": "subject",
+        "type": "string",
+        "description": "Subject line; may use the template's variables ({{CODE}}).",
+        "required": true
+      },
+      {
+        "name": "template_id",
+        "type": "string",
+        "description": "The published template (id or alias) whose published version is its content.",
+        "required": true
+      },
+      {
+        "name": "track_clicks",
+        "type": "boolean",
+        "description": "Count clicks in its sends (default false)."
+      },
+      {
+        "name": "track_opens",
+        "type": "boolean",
+        "description": "Count opens of its sends (default false)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or an address on a verified sending domain.",
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "description": "Idempotency-Key header: a retry with the same key returns the first answer.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Your name for it, 1 to 255 characters.",
+          "type": "string"
+        },
+        "preview_text": {
+          "description": "Inbox preview text (empty: none).",
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Reply-To addresses (at most 50).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "description": "Subject line; may use the template's variables ({{CODE}}).",
+          "type": "string"
+        },
+        "template_id": {
+          "description": "The published template (id or alias) whose published version is its content.",
+          "type": "string"
+        },
+        "track_clicks": {
+          "description": "Count clicks in its sends (default false).",
+          "type": "boolean"
+        },
+        "track_opens": {
+          "description": "Count opens of its sends (default false).",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "template_id",
+        "from",
+        "subject"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "list-transactional-emails",
+    "description": "List transactional emails, optionally filtered by search or template.",
+    "method": "GET",
+    "path": "/transactional",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "after",
+        "type": "string",
+        "description": "Cursor: return items after this id (the last id of the previous page)."
+      },
+      {
+        "name": "before",
+        "type": "string",
+        "description": "Cursor: return items before this id."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Page size (1 to 100)."
+      },
+      {
+        "name": "search",
+        "type": "string",
+        "description": "Matches the name or subject."
+      },
+      {
+        "name": "template_id",
+        "type": "string",
+        "description": "Only those of this template (id or alias)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "description": "Cursor: return items after this id (the last id of the previous page).",
+          "type": "string"
+        },
+        "before": {
+          "description": "Cursor: return items before this id.",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Page size (1 to 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "search": {
+          "description": "Matches the name or subject.",
+          "type": "string"
+        },
+        "template_id": {
+          "description": "Only those of this template (id or alias).",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-transactional-email",
+    "description": "Get a transactional email with the variables of the template version its sends use now.",
+    "method": "GET",
+    "path": "/transactional/{id}",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The transactional email id (tx_...).",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The transactional email id (tx_...).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "update-transactional-email",
+    "description": "Update a transactional email (only the fields given change; sends use the change within 10 seconds).",
+    "method": "PATCH",
+    "path": "/transactional/{id}",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "expected_updated_at",
+        "type": "string",
+        "description": "The updated_at you read: a newer change makes this a 409 conflict instead of overwriting it."
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or an address on a verified sending domain."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The transactional email id (tx_...).",
+        "required": true
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "string",
+        "description": "Idempotency-Key header: a retry with the same key returns the first answer."
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Your name for it, 1 to 255 characters."
+      },
+      {
+        "name": "preview_text",
+        "type": "string",
+        "description": "Inbox preview text (empty: none)."
+      },
+      {
+        "name": "reply_to",
+        "type": "array",
+        "items": "string",
+        "description": "Reply-To addresses (at most 50)."
+      },
+      {
+        "name": "subject",
+        "type": "string",
+        "description": "Subject line; may use the template's variables ({{CODE}})."
+      },
+      {
+        "name": "template_id",
+        "type": "string",
+        "description": "The published template (id or alias) whose published version is its content."
+      },
+      {
+        "name": "track_clicks",
+        "type": "boolean",
+        "description": "Count clicks in its sends (default false)."
+      },
+      {
+        "name": "track_opens",
+        "type": "boolean",
+        "description": "Count opens of its sends (default false)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_updated_at": {
+          "description": "The updated_at you read: a newer change makes this a 409 conflict instead of overwriting it.",
+          "type": "string"
+        },
+        "from": {
+          "description": "Sender, \"Name \u003cuser@verified-domain\u003e\" or an address on a verified sending domain.",
+          "type": "string"
+        },
+        "id": {
+          "description": "The transactional email id (tx_...).",
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "description": "Idempotency-Key header: a retry with the same key returns the first answer.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Your name for it, 1 to 255 characters.",
+          "type": "string"
+        },
+        "preview_text": {
+          "description": "Inbox preview text (empty: none).",
+          "type": "string"
+        },
+        "reply_to": {
+          "description": "Reply-To addresses (at most 50).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "subject": {
+          "description": "Subject line; may use the template's variables ({{CODE}}).",
+          "type": "string"
+        },
+        "template_id": {
+          "description": "The published template (id or alias) whose published version is its content.",
+          "type": "string"
+        },
+        "track_clicks": {
+          "description": "Count clicks in its sends (default false).",
+          "type": "boolean"
+        },
+        "track_opens": {
+          "description": "Count opens of its sends (default false).",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "remove-transactional-email",
+    "description": "Delete a transactional email (its sends are refused from then on; its emails and stats stay).",
+    "method": "DELETE",
+    "path": "/transactional/{id}",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The transactional email id (tx_...).",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The transactional email id (tx_...).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "send-test-transactional-email",
+    "description": "Send a test of a transactional email to 1 to 5 addresses (subject marked [Test]; not counted in stats).",
+    "method": "POST",
+    "path": "/transactional/{id}/test",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The transactional email id (tx_...).",
+        "required": true
+      },
+      {
+        "name": "to",
+        "type": "array",
+        "items": "string",
+        "description": "1 to 5 recipient addresses.",
+        "required": true
+      },
+      {
+        "name": "variables",
+        "type": "object",
+        "description": "Variable values, {key: value}."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The transactional email id (tx_...).",
+          "type": "string"
+        },
+        "to": {
+          "description": "1 to 5 recipient addresses.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "variables": {
+          "description": "Variable values, {key: value}.",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "to"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "get-transactional-email-stats",
+    "description": "Get a transactional email's numbers: sent, delivered, opens, clicks and bounces, a daily series and the split per template version.",
+    "method": "GET",
+    "path": "/transactional/{id}/stats",
+    "family": "Transactional emails",
+    "params": [
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Start: a date or ISO 8601 time (default: 7 days before to)."
+      },
+      {
+        "name": "granularity",
+        "type": "string",
+        "enum": [
+          "daily",
+          "hourly"
+        ],
+        "description": "Series step."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The transactional email id (tx_...).",
+        "required": true
+      },
+      {
+        "name": "timezone",
+        "type": "string",
+        "description": "IANA time zone (default UTC)."
+      },
+      {
+        "name": "to",
+        "type": "string",
+        "description": "End (default: now; at most 90 days after from)."
+      },
+      {
+        "name": "version",
+        "type": "string",
+        "description": "Only this template version (id, or number of its current template)."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "description": "Start: a date or ISO 8601 time (default: 7 days before to).",
+          "type": "string"
+        },
+        "granularity": {
+          "description": "Series step.",
+          "enum": [
+            "daily",
+            "hourly"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "The transactional email id (tx_...).",
+          "type": "string"
+        },
+        "timezone": {
+          "description": "IANA time zone (default UTC).",
+          "type": "string"
+        },
+        "to": {
+          "description": "End (default: now; at most 90 days after from).",
+          "type": "string"
+        },
+        "version": {
+          "description": "Only this template version (id, or number of its current template).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
       ],
       "type": "object"
     }
@@ -1856,7 +2450,7 @@
   },
   {
     "name": "create-contact-import",
-    "description": "Import contacts from CSV text (or create an import that takes its file at an upload URL).",
+    "description": "Import contacts from CSV text or from a CSV at a URL (or create an import that takes its file at an upload URL).",
     "method": "POST",
     "path": "/contacts/imports",
     "family": "Contact imports",
@@ -1887,6 +2481,11 @@
           "tab"
         ],
         "description": "Column delimiter (default: guessed)."
+      },
+      {
+        "name": "file_url",
+        "type": "string",
+        "description": "Instead of csv: a public https URL of the CSV, which send.io downloads (at most 50 MB, no redirect or sign-in)."
       },
       {
         "name": "has_header",
@@ -1965,6 +2564,10 @@
             "|",
             "tab"
           ],
+          "type": "string"
+        },
+        "file_url": {
+          "description": "Instead of csv: a public https URL of the CSV, which send.io downloads (at most 50 MB, no redirect or sign-in).",
           "type": "string"
         },
         "has_header": {
@@ -3005,7 +3608,12 @@
       {
         "name": "template_id",
         "type": "string",
-        "description": "Start from this published template (id or alias): its content and engine fill the fields not given."
+        "description": "Make the broadcast from this published template (id or alias): it copies the version's content and engine, and fills subject, From, preview text and Reply-To where the broadcast has none. null detaches it. Not with html, text or template_engine."
+      },
+      {
+        "name": "template_version_id",
+        "type": "string",
+        "description": "The published version of the template to copy (default: the one published now). Alone on update: switch to another version of the broadcast's template."
       },
       {
         "name": "text",
@@ -3109,7 +3717,11 @@
           "type": "string"
         },
         "template_id": {
-          "description": "Start from this published template (id or alias): its content and engine fill the fields not given.",
+          "description": "Make the broadcast from this published template (id or alias): it copies the version's content and engine, and fills subject, From, preview text and Reply-To where the broadcast has none. null detaches it. Not with html, text or template_engine.",
+          "type": "string"
+        },
+        "template_version_id": {
+          "description": "The published version of the template to copy (default: the one published now). Alone on update: switch to another version of the broadcast's template.",
           "type": "string"
         },
         "text": {
@@ -3214,7 +3826,7 @@
   },
   {
     "name": "get-broadcast",
-    "description": "Get a broadcast.",
+    "description": "Get a broadcast, with updated_at (send it as expected_updated_at on update), warnings (segments or topic it names that were deleted; it cannot be sent until they are removed) and unknown_merge_tags (tags in the subject or preview text that would be sent as typed).",
     "method": "GET",
     "path": "/broadcasts/{id}",
     "family": "Broadcasts",
@@ -3242,7 +3854,7 @@
   },
   {
     "name": "update-broadcast",
-    "description": "Update a draft or scheduled broadcast (only the name once it is sending).",
+    "description": "Update a draft or scheduled broadcast (only the name once it is sending). Answers with the new updated_at, version_number, warnings and unknown_merge_tags. A deleted segment or topic is kept and listed in warnings; a scheduled broadcast refuses an update that adds one (422).",
     "method": "PATCH",
     "path": "/broadcasts/{id}",
     "family": "Broadcasts",
@@ -3261,6 +3873,11 @@
         "type": "array",
         "items": "string",
         "description": "Never send to members of these segments."
+      },
+      {
+        "name": "expected_updated_at",
+        "type": "string",
+        "description": "The updated_at you read: a newer change makes this a 409 conflict instead of overwriting it."
       },
       {
         "name": "from",
@@ -3317,7 +3934,12 @@
       {
         "name": "template_id",
         "type": "string",
-        "description": "Start from this published template (id or alias): its content and engine fill the fields not given."
+        "description": "Make the broadcast from this published template (id or alias): it copies the version's content and engine, and fills subject, From, preview text and Reply-To where the broadcast has none. null detaches it. Not with html, text or template_engine."
+      },
+      {
+        "name": "template_version_id",
+        "type": "string",
+        "description": "The published version of the template to copy (default: the one published now). Alone on update: switch to another version of the broadcast's template."
       },
       {
         "name": "text",
@@ -3371,6 +3993,10 @@
           },
           "type": "array"
         },
+        "expected_updated_at": {
+          "description": "The updated_at you read: a newer change makes this a 409 conflict instead of overwriting it.",
+          "type": "string"
+        },
         "from": {
           "type": "string"
         },
@@ -3417,7 +4043,11 @@
           "type": "string"
         },
         "template_id": {
-          "description": "Start from this published template (id or alias): its content and engine fill the fields not given.",
+          "description": "Make the broadcast from this published template (id or alias): it copies the version's content and engine, and fills subject, From, preview text and Reply-To where the broadcast has none. null detaches it. Not with html, text or template_engine.",
+          "type": "string"
+        },
+        "template_version_id": {
+          "description": "The published version of the template to copy (default: the one published now). Alone on update: switch to another version of the broadcast's template.",
           "type": "string"
         },
         "text": {
@@ -3456,7 +4086,7 @@
   },
   {
     "name": "send-broadcast",
-    "description": "Send a draft broadcast now, or schedule it with scheduled_at.",
+    "description": "Send a draft broadcast now, or schedule it with scheduled_at. Send a scheduled broadcast again with scheduled_at to reschedule it, or with now: true to send it now (it stays scheduled if that is refused). Refused (422) while it names a deleted segment or topic, or has unknown_merge_tags.",
     "method": "POST",
     "path": "/broadcasts/{id}/send",
     "family": "Broadcasts",
@@ -3466,6 +4096,11 @@
         "type": "string",
         "description": "The broadcast id.",
         "required": true
+      },
+      {
+        "name": "now",
+        "type": "boolean",
+        "description": "Send a scheduled broadcast now instead of at its time. Not with scheduled_at."
       },
       {
         "name": "scheduled_at",
@@ -3479,6 +4114,10 @@
         "id": {
           "description": "The broadcast id.",
           "type": "string"
+        },
+        "now": {
+          "description": "Send a scheduled broadcast now instead of at its time. Not with scheduled_at.",
+          "type": "boolean"
         },
         "scheduled_at": {
           "description": "Send time: ISO 8601 or relative time (in 30 minutes, in 2 hours, in 3 days), within 30 days; omit to send now.",
@@ -3520,8 +4159,118 @@
     }
   },
   {
+    "name": "pause-broadcast",
+    "description": "Pause a sending broadcast after the batch in flight; it resumes from the next recipient.",
+    "method": "POST",
+    "path": "/broadcasts/{id}/pause",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "resume-broadcast",
+    "description": "Resume a paused broadcast from the next recipient. A broadcast whose Except segment or topic was deleted is paused by the system and resumes only with remove_deleted (422 audience_deleted otherwise).",
+    "method": "POST",
+    "path": "/broadcasts/{id}/resume",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "remove_deleted",
+        "type": "array",
+        "items": "string",
+        "description": "The deleted segment and topic ids (from the broadcast's warnings) to take out of its audience before going on. Needed while a deleted segment under Except, or a deleted topic, is named."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "remove_deleted": {
+          "description": "The deleted segment and topic ids (from the broadcast's warnings) to take out of its audience before going on. Needed while a deleted segment under Except, or a deleted topic, is named.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
+    "name": "continue-broadcast",
+    "description": "Continue a broadcast that stopped part way (canceled while sending, or failed for insufficient_credits or send_error): it sends only to the contacts of its audience it has not emailed yet. A deleted Except segment or topic must be listed in remove_deleted (422 audience_deleted otherwise).",
+    "method": "POST",
+    "path": "/broadcasts/{id}/continue",
+    "family": "Broadcasts",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "description": "The broadcast id.",
+        "required": true
+      },
+      {
+        "name": "remove_deleted",
+        "type": "array",
+        "items": "string",
+        "description": "The deleted segment and topic ids (from the broadcast's warnings) to take out of its audience before going on. Needed while a deleted segment under Except, or a deleted topic, is named."
+      }
+    ],
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "The broadcast id.",
+          "type": "string"
+        },
+        "remove_deleted": {
+          "description": "The deleted segment and topic ids (from the broadcast's warnings) to take out of its audience before going on. Needed while a deleted segment under Except, or a deleted topic, is named.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    }
+  },
+  {
     "name": "duplicate-broadcast",
-    "description": "Copy a broadcast as a new draft.",
+    "description": "Copy a broadcast as a new draft. The copy goes to everyone in its audience again; to reach only the rest of one that stopped part way, continue it instead.",
     "method": "POST",
     "path": "/broadcasts/{id}/duplicate",
     "family": "Broadcasts",
@@ -3577,7 +4326,7 @@
   },
   {
     "name": "estimate-broadcast",
-    "description": "Count the contacts an audience reaches now (before suppressions), and how many are skipped as invalid.",
+    "description": "Count the contacts an audience reaches now (before suppressions), and how many are skipped as invalid. Deleted segments or topic are listed in warnings.",
     "method": "POST",
     "path": "/broadcasts/estimate",
     "family": "Broadcasts",
@@ -4654,6 +5403,11 @@
           "ecommerce",
           "engagement",
           "lead_capture",
+          "appointments",
+          "events",
+          "education",
+          "account",
+          "nonprofit",
           "internal"
         ],
         "description": "Only this category."
@@ -4670,6 +5424,11 @@
             "ecommerce",
             "engagement",
             "lead_capture",
+            "appointments",
+            "events",
+            "education",
+            "account",
+            "nonprofit",
             "internal"
           ],
           "type": "string"
@@ -6001,7 +6760,7 @@
   },
   {
     "name": "get-log",
-    "description": "Get one API request log with its request and response bodies.",
+    "description": "Get one API request log: endpoint, method, status and user agent. Request and response bodies are not stored.",
     "method": "GET",
     "path": "/logs/{id}",
     "family": "Logs",

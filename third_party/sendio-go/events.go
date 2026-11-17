@@ -95,7 +95,7 @@ type EventsSvcImpl struct {
 }
 
 // CreateWithContext creates a new Event definition
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) CreateWithContext(ctx context.Context, params *CreateEventRequest) (CreateEventResponse, error) {
 	req, err := s.client.NewRequest(ctx, http.MethodPost, "events", params)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *EventsSvcImpl) Create(params *CreateEventRequest) (CreateEventResponse,
 }
 
 // GetWithContext retrieves an Event by ID or name
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) GetWithContext(ctx context.Context, identifier string) (Event, error) {
 	path := "events/" + identifier
 
@@ -141,7 +141,7 @@ func (s *EventsSvcImpl) Get(identifier string) (Event, error) {
 }
 
 // ListWithOptions retrieves a list of Events with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListEventsResponse, error) {
 	path := "events" + buildPaginationQuery(options)
 
@@ -160,7 +160,7 @@ func (s *EventsSvcImpl) ListWithOptions(ctx context.Context, options *ListOption
 }
 
 // ListWithContext retrieves a list of Events
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) ListWithContext(ctx context.Context) (ListEventsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
@@ -171,7 +171,7 @@ func (s *EventsSvcImpl) List() (ListEventsResponse, error) {
 }
 
 // UpdateWithContext updates an Event's schema by ID or name
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) UpdateWithContext(ctx context.Context, identifier string, params *UpdateEventRequest) (UpdateEventResponse, error) {
 	path := "events/" + identifier
 
@@ -195,7 +195,7 @@ func (s *EventsSvcImpl) Update(identifier string, params *UpdateEventRequest) (U
 }
 
 // RemoveWithContext deletes an Event by ID or name
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) RemoveWithContext(ctx context.Context, identifier string) (DeleteEventResponse, error) {
 	path := "events/" + identifier
 
@@ -219,7 +219,7 @@ func (s *EventsSvcImpl) Remove(identifier string) (DeleteEventResponse, error) {
 }
 
 // SendWithContext sends an Event to trigger automations
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EventsSvcImpl) SendWithContext(ctx context.Context, params *SendEventRequest) (SendEventResponse, error) {
 	req, err := s.client.NewRequest(ctx, http.MethodPost, "events/send", params)
 	if err != nil {

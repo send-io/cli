@@ -151,7 +151,7 @@ type TemplatesSvcImpl struct {
 }
 
 // CreateWithContext creates a new template with the given parameters
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) CreateWithContext(ctx context.Context, params *CreateTemplateRequest) (*CreateTemplateResponse, error) {
 	path := "templates"
 
@@ -175,13 +175,13 @@ func (s *TemplatesSvcImpl) CreateWithContext(ctx context.Context, params *Create
 }
 
 // Create creates a new template with the given parameters
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Create(params *CreateTemplateRequest) (*CreateTemplateResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // GetWithContext retrieves a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) GetWithContext(ctx context.Context, identifier string) (*Template, error) {
 	path := "templates/" + identifier
 
@@ -205,13 +205,13 @@ func (s *TemplatesSvcImpl) GetWithContext(ctx context.Context, identifier string
 }
 
 // Get retrieves a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Get(identifier string) (*Template, error) {
 	return s.GetWithContext(context.Background(), identifier)
 }
 
 // ListWithContext retrieves a list of templates with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) ListWithContext(ctx context.Context, options *ListOptions) (*ListTemplatesResponse, error) {
 	path := "templates" + buildPaginationQuery(options)
 
@@ -235,13 +235,13 @@ func (s *TemplatesSvcImpl) ListWithContext(ctx context.Context, options *ListOpt
 }
 
 // List retrieves a list of templates with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) List(options *ListOptions) (*ListTemplatesResponse, error) {
 	return s.ListWithContext(context.Background(), options)
 }
 
 // UpdateWithContext updates a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) UpdateWithContext(ctx context.Context, identifier string, params *UpdateTemplateRequest) (*UpdateTemplateResponse, error) {
 	path := "templates/" + identifier
 
@@ -265,13 +265,13 @@ func (s *TemplatesSvcImpl) UpdateWithContext(ctx context.Context, identifier str
 }
 
 // Update updates a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Update(identifier string, params *UpdateTemplateRequest) (*UpdateTemplateResponse, error) {
 	return s.UpdateWithContext(context.Background(), identifier, params)
 }
 
 // PublishWithContext publishes a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) PublishWithContext(ctx context.Context, identifier string) (*PublishTemplateResponse, error) {
 	path := "templates/" + identifier + "/publish"
 
@@ -295,13 +295,13 @@ func (s *TemplatesSvcImpl) PublishWithContext(ctx context.Context, identifier st
 }
 
 // Publish publishes a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Publish(identifier string) (*PublishTemplateResponse, error) {
 	return s.PublishWithContext(context.Background(), identifier)
 }
 
 // DuplicateWithContext duplicates a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) DuplicateWithContext(ctx context.Context, identifier string) (*DuplicateTemplateResponse, error) {
 	path := "templates/" + identifier + "/duplicate"
 
@@ -325,13 +325,13 @@ func (s *TemplatesSvcImpl) DuplicateWithContext(ctx context.Context, identifier 
 }
 
 // Duplicate duplicates a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Duplicate(identifier string) (*DuplicateTemplateResponse, error) {
 	return s.DuplicateWithContext(context.Background(), identifier)
 }
 
 // RemoveWithContext removes a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) RemoveWithContext(ctx context.Context, identifier string) (*RemoveTemplateResponse, error) {
 	path := "templates/" + identifier
 
@@ -355,7 +355,7 @@ func (s *TemplatesSvcImpl) RemoveWithContext(ctx context.Context, identifier str
 }
 
 // Remove removes a template by ID or alias
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *TemplatesSvcImpl) Remove(identifier string) (*RemoveTemplateResponse, error) {
 	return s.RemoveWithContext(context.Background(), identifier)
 }

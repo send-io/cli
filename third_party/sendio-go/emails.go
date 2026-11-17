@@ -27,7 +27,7 @@ type EmailTemplate struct {
 
 // SendEmailRequest is the request object for the Send call.
 //
-// See also https://send.io/docs/api
+// See also https://developer.send.io/docs/api
 type SendEmailRequest struct {
 	From        string            `json:"from"`
 	To          []string          `json:"to"`
@@ -41,8 +41,23 @@ type SendEmailRequest struct {
 	Attachments []*Attachment     `json:"attachments,omitempty"`
 	Headers     map[string]string `json:"headers,omitempty"`
 	ScheduledAt string            `json:"scheduled_at,omitempty"`
-	Template    *EmailTemplate    `json:"template,omitempty"`
-	TopicId     string            `json:"topic_id,omitempty"`
+	// Deprecated: send a template with TransactionalId instead; still accepted for now.
+	Template *EmailTemplate `json:"template,omitempty"`
+	TopicId  string         `json:"topic_id,omitempty"`
+
+	// TransactionalId sends a transactional email ("tx_..."): it sets the
+	// sender, subject, reply-to, preview text and content (its template's
+	// published version), so leave From, Subject, ReplyTo, Html, Text and
+	// Template empty. Pass the template's variables in Variables.
+	TransactionalId string `json:"transactional_id,omitempty"`
+	// Variables are the variables of a TransactionalId send.
+	Variables map[string]any `json:"variables,omitempty"`
+
+	// TrackOpens and TrackClicks override open and click tracking for this
+	// email (sendio.Bool(false) turns it off); nil follows the domain's
+	// setting, or the transactional email's.
+	TrackOpens  *bool `json:"track_opens,omitempty"`
+	TrackClicks *bool `json:"track_clicks,omitempty"`
 
 	// ReplyToAddresses are reply-to addresses sent in reply_to after ReplyTo
 	// (if set), as an array.
@@ -56,7 +71,17 @@ func (r SendEmailRequest) MarshalJSON() ([]byte, error) {
 	body := struct {
 		plain
 		ReplyTo any `json:"reply_to,omitempty"`
+		From    any `json:"from,omitempty"`
+		Subject any `json:"subject,omitempty"`
 	}{plain: plain(r)}
+	// from and subject are always sent, as before, except on a
+	// transactional send, which leaves them to the transactional email.
+	if r.TransactionalId == "" || r.From != "" {
+		body.From = r.From
+	}
+	if r.TransactionalId == "" || r.Subject != "" {
+		body.Subject = r.Subject
+	}
 
 	switch {
 	case len(r.ReplyToAddresses) == 0 && r.ReplyTo != "":
@@ -121,6 +146,8 @@ type Email struct {
 	Cc        []string `json:"cc"`
 	ReplyTo   []string `json:"reply_to"`
 	LastEvent string   `json:"last_event"`
+	// TransactionalId is the transactional email the email was sent from ("" for other emails).
+	TransactionalId string `json:"transactional_id,omitempty"`
 }
 
 // ListEmailsResponse is the response from the List call.
@@ -207,7 +234,7 @@ const (
 
 // MetricsOptions contains the optional query parameters for the Metrics call.
 //
-// See also https://send.io/docs/api
+// See also https://developer.send.io/docs/api
 type MetricsOptions struct {
 	// StartDate filters metrics to on/after this ISO 8601 date or datetime.
 	// Defaults server-side to 6 days before EndDate.
@@ -350,7 +377,7 @@ type MetricsDataPoint struct {
 
 // MetricsResponse is the response from the Metrics call.
 //
-// See also https://send.io/docs/api
+// See also https://developer.send.io/docs/api
 type MetricsResponse struct {
 	Object      string             `json:"object"`
 	StartDate   string             `json:"start_date"`
@@ -454,13 +481,13 @@ type EmailsSvcImpl struct {
 }
 
 // Cancel cancels an email by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Cancel(emailId string) (*CancelScheduledEmailResponse, error) {
 	return s.CancelWithContext(context.Background(), emailId)
 }
 
 // CancelWithContext cancels an email by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) CancelWithContext(ctx context.Context, emailId string) (*CancelScheduledEmailResponse, error) {
 	path := "emails/" + emailId + "/cancel"
 
@@ -484,13 +511,13 @@ func (s *EmailsSvcImpl) CancelWithContext(ctx context.Context, emailId string) (
 }
 
 // Share creates a shareable link for a sent or received email by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Share(emailId string, params *ShareEmailRequest) (*ShareEmailResponse, error) {
 	return s.ShareWithContext(context.Background(), emailId, params)
 }
 
 // ShareWithContext creates a shareable link for a sent or received email by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ShareWithContext(ctx context.Context, emailId string, params *ShareEmailRequest) (*ShareEmailResponse, error) {
 	path := "emails/" + emailId + "/share"
 
@@ -515,13 +542,13 @@ func (s *EmailsSvcImpl) ShareWithContext(ctx context.Context, emailId string, pa
 }
 
 // Update updates an email with the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Update(params *UpdateEmailRequest) (*UpdateEmailResponse, error) {
 	return s.UpdateWithContext(context.Background(), params)
 }
 
 // UpdateWithContext updates an email with the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateEmailRequest) (*UpdateEmailResponse, error) {
 	path := "emails/" + params.Id
 
@@ -546,7 +573,7 @@ func (s *EmailsSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateEma
 
 // SendWithOptions sends an email with the given params
 // and additional options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) SendWithOptions(ctx context.Context, params *SendEmailRequest, options *SendEmailOptions) (*SendEmailResponse, error) {
 	path := "emails"
 
@@ -570,7 +597,7 @@ func (s *EmailsSvcImpl) SendWithOptions(ctx context.Context, params *SendEmailRe
 }
 
 // SendWithContext sends an email with the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) SendWithContext(ctx context.Context, params *SendEmailRequest) (*SendEmailResponse, error) {
 	path := "emails"
 
@@ -594,13 +621,13 @@ func (s *EmailsSvcImpl) SendWithContext(ctx context.Context, params *SendEmailRe
 }
 
 // Send sends an email with the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Send(params *SendEmailRequest) (*SendEmailResponse, error) {
 	return s.SendWithContext(context.Background(), params)
 }
 
 // GetWithContext retrieves an email with the given emailId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) GetWithContext(ctx context.Context, emailId string) (*Email, error) {
 	path := "emails/" + emailId
 
@@ -624,13 +651,13 @@ func (s *EmailsSvcImpl) GetWithContext(ctx context.Context, emailId string) (*Em
 }
 
 // Get retrieves an email with the given emailId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Get(emailId string) (*Email, error) {
 	return s.GetWithContext(context.Background(), emailId)
 }
 
 // ListWithOptions retrieves a list of emails with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListEmailsResponse, error) {
 	path := "emails" + buildPaginationQuery(options)
 
@@ -654,19 +681,19 @@ func (s *EmailsSvcImpl) ListWithOptions(ctx context.Context, options *ListOption
 }
 
 // ListWithContext retrieves a list of emails
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ListWithContext(ctx context.Context) (ListEmailsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
 
 // List retrieves a list of emails
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) List() (ListEmailsResponse, error) {
 	return s.ListWithContext(context.Background())
 }
 
 // GetAttachmentWithContext retrieves a single attachment from a sent email with the given emailId and attachmentId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) GetAttachmentWithContext(ctx context.Context, emailId string, attachmentId string) (*EmailAttachment, error) {
 	path := "emails/" + emailId + "/attachments/" + attachmentId
 
@@ -689,13 +716,13 @@ func (s *EmailsSvcImpl) GetAttachmentWithContext(ctx context.Context, emailId st
 }
 
 // GetAttachment retrieves a single attachment from a sent email with the given emailId and attachmentId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) GetAttachment(emailId string, attachmentId string) (*EmailAttachment, error) {
 	return s.GetAttachmentWithContext(context.Background(), emailId, attachmentId)
 }
 
 // ListAttachmentsWithOptions retrieves a list of attachments for a sent email with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ListAttachmentsWithOptions(ctx context.Context, emailId string, options *ListOptions) (ListEmailAttachmentsResponse, error) {
 	path := "emails/" + emailId + "/attachments" + buildPaginationQuery(options)
 
@@ -719,19 +746,19 @@ func (s *EmailsSvcImpl) ListAttachmentsWithOptions(ctx context.Context, emailId 
 }
 
 // ListAttachmentsWithContext retrieves a list of attachments for a sent email
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ListAttachmentsWithContext(ctx context.Context, emailId string) (ListEmailAttachmentsResponse, error) {
 	return s.ListAttachmentsWithOptions(ctx, emailId, nil)
 }
 
 // ListAttachments retrieves a list of attachments for a sent email
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) ListAttachments(emailId string) (ListEmailAttachmentsResponse, error) {
 	return s.ListAttachmentsWithContext(context.Background(), emailId)
 }
 
 // MetricsWithOptions retrieves email metrics with the given options.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) MetricsWithOptions(ctx context.Context, options *MetricsOptions) (*MetricsResponse, error) {
 	if options != nil && metricsInvolvesEmailAndBroadcast(options) {
 		return nil, errors.New("[ERROR]: The `email` dimension/EmailId cannot be combined with the `broadcast` dimension/BroadcastId.")
@@ -758,13 +785,13 @@ func (s *EmailsSvcImpl) MetricsWithOptions(ctx context.Context, options *Metrics
 }
 
 // MetricsWithContext retrieves email metrics.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) MetricsWithContext(ctx context.Context) (*MetricsResponse, error) {
 	return s.MetricsWithOptions(ctx, nil)
 }
 
 // Metrics retrieves email metrics.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *EmailsSvcImpl) Metrics() (*MetricsResponse, error) {
 	return s.MetricsWithContext(context.Background())
 }

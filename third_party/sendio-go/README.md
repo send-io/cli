@@ -1,18 +1,18 @@
 # send.io Go SDK
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Go Reference](https://pkg.go.dev/badge/send.io/sendio-go.svg)](https://pkg.go.dev/send.io/sendio-go)
+[![Go Reference](https://pkg.go.dev/badge/github.com/send-io/sendio-go.svg)](https://pkg.go.dev/github.com/send-io/sendio-go)
 
 The official Go library for the [send.io](https://send.io) email API.
 
-- Module: `send.io/sendio-go`
+- Module: `github.com/send-io/sendio-go`
 - Package: `sendio`
-- API reference: https://send.io/docs/api
+- API reference: https://developer.send.io/docs/api
 
 ## Installation
 
 ```sh
-go get send.io/sendio-go
+go get github.com/send-io/sendio-go
 ```
 
 Requires Go 1.23 or newer.
@@ -34,7 +34,7 @@ import (
 	"fmt"
 	"os"
 
-	"send.io/sendio-go"
+	"github.com/send-io/sendio-go"
 )
 
 func main() {
@@ -101,6 +101,36 @@ for _, e := range batch.Data {
 	fmt.Println(e.Id)
 }
 ```
+
+## Transactional emails
+
+A transactional email (a sign-in code, a password reset, a receipt) is a saved
+send of a published template: it keeps the From, subject, reply-to and
+tracking (off by default), and its content is the template's published
+version. Create it once, then send it by id with only the recipient and the
+variables.
+
+```go
+tx, err := client.Transactional.Create(&sendio.CreateTransactionalEmailRequest{
+	Name:       "Sign-in code",
+	TemplateId: "signin-code", // a published template, by id or alias
+	From:       "Acme <security@mail.example.com>",
+	Subject:    "Your code is {{CODE}}",
+})
+if err != nil {
+	panic(err)
+}
+
+sent, err := client.Emails.Send(&sendio.SendEmailRequest{
+	TransactionalId: tx.Id,
+	To:              []string{"ada@example.com"},
+	Variables:       map[string]any{"CODE": "123456"},
+})
+```
+
+`Transactional` also has `List` (filter by `Search` or `TemplateId`), `Get`,
+`Update` (set `ExpectedUpdatedAt` to refuse a stale save with 409), `Remove`,
+`SendTest` and `Stats`.
 
 ## Retrieve an email
 
@@ -190,7 +220,7 @@ The client also covers API keys, segments, contacts (with topics, segments, prop
 
 The base URL is accepted with or without a trailing slash, and a path prefix (for example `http://localhost:8080/v1`) is kept. Overriding it is mainly useful for tests against a mock server or a staging environment.
 
-Every request sends `User-Agent: sendio-go:1.1.0`.
+Every request sends `User-Agent: sendio-go:1.2.0`.
 
 ## Error handling
 
@@ -233,7 +263,7 @@ SENDIO_API_KEY=mx_... SENDIO_BASE_URL=https://api.send.io go run ./examples/smok
 
 ## Documentation
 
-Full API reference: https://send.io/docs/api
+Full API reference: https://developer.send.io/docs/api
 
 ## License
 

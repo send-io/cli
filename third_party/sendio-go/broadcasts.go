@@ -2,6 +2,7 @@ package sendio
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -59,6 +60,15 @@ type CreateBroadcastRequest struct {
 	// rendered for each recipient with the contact as data.
 	TemplateEngine string `json:"template_engine,omitempty"`
 
+	// TemplateId makes the broadcast from a published template (id or
+	// alias): it copies the version's content, and its subject, From,
+	// preview text and reply-to where the request has none. Not with Html,
+	// Text or TemplateEngine.
+	TemplateId string `json:"template_id,omitempty"`
+	// TemplateVersionId picks the published version to copy (default: the
+	// one published now).
+	TemplateVersionId string `json:"template_version_id,omitempty"`
+
 	// Send the broadcast immediately upon creation instead of creating a draft.
 	Send bool `json:"send,omitempty"`
 
@@ -115,6 +125,31 @@ type UpdateBroadcastRequest struct {
 	// TemplateEngine is "simple" (merge tags, the default) or "handlebars",
 	// rendered for each recipient with the contact as data.
 	TemplateEngine string `json:"template_engine,omitempty"`
+
+	// TemplateId links the broadcast to a published template (id or alias)
+	// and copies its version's content. It fills subject, From, preview text
+	// and reply-to only where the broadcast has none. Sending Html, Text or
+	// TemplateEngine instead gives the broadcast its own content and
+	// detaches it from its template. Use DetachTemplate to detach it
+	// without changing the content.
+	TemplateId string `json:"template_id,omitempty"`
+	// TemplateVersionId picks the published version to copy; alone, it
+	// switches to another version of the broadcast's template.
+	TemplateVersionId string `json:"template_version_id,omitempty"`
+	// DetachTemplate sends template_id: null (the content stays).
+	DetachTemplate bool `json:"-"`
+}
+
+// MarshalJSON sends template_id: null for DetachTemplate.
+func (r UpdateBroadcastRequest) MarshalJSON() ([]byte, error) {
+	type plain UpdateBroadcastRequest
+	if !r.DetachTemplate {
+		return json.Marshal(plain(r))
+	}
+	return json.Marshal(struct {
+		plain
+		TemplateId *string `json:"template_id"`
+	}{plain: plain(r)})
 }
 
 type CreateBroadcastResponse struct {
@@ -280,6 +315,19 @@ type Broadcast struct {
 	UnsubscribeScope  string   `json:"unsubscribe_scope"`
 	Tracking          bool     `json:"tracking"`
 	TemplateEngine    string   `json:"template_engine"`
+
+	// The template the broadcast was made from (nil for its own content):
+	// the exact published version it copied (Get only).
+	TemplateId            *string `json:"template_id"`
+	TemplateVersionId     *string `json:"template_version_id"`
+	TemplateName          *string `json:"template_name"`
+	TemplateVersionNumber *int    `json:"template_version_number"`
+	TemplateVersionName   *string `json:"template_version_name"`
+	TemplateDeleted       bool    `json:"template_deleted"`
+	// UnfillableVariables (Get, for a broadcast made from a template) are
+	// the template variables with no value in a broadcast. While it is not
+	// empty, Send refuses with 422 unfillable_variables.
+	UnfillableVariables []string `json:"unfillable_variables"`
 }
 
 type BroadcastsSvc interface {
@@ -344,7 +392,7 @@ type BroadcastsSvcImpl struct {
 }
 
 // CreateWithContext creates a new Broadcast based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) CreateWithContext(ctx context.Context, params *CreateBroadcastRequest) (CreateBroadcastResponse, error) {
 	path := "broadcasts"
 
@@ -352,11 +400,13 @@ func (s *BroadcastsSvcImpl) CreateWithContext(ctx context.Context, params *Creat
 		return CreateBroadcastResponse{}, errors.New(`[ERROR]: Either SegmentId, AudienceId or SegmentIds must be provided, or Audience must be "all"`)
 	}
 
-	if params.From == "" {
+	// A broadcast made from a template takes the template's From and
+	// subject when it has them; the API says when neither has one.
+	if params.From == "" && params.TemplateId == "" {
 		return CreateBroadcastResponse{}, errors.New("[ERROR]: From cannot be empty")
 	}
 
-	if params.Subject == "" {
+	if params.Subject == "" && params.TemplateId == "" {
 		return CreateBroadcastResponse{}, errors.New("[ERROR]: Subject cannot be empty")
 	}
 
@@ -385,7 +435,7 @@ func (s *BroadcastsSvcImpl) Create(params *CreateBroadcastRequest) (CreateBroadc
 }
 
 // UpdateWithContext updates a given broadcast entry
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) UpdateWithContext(ctx context.Context, params *UpdateBroadcastRequest) (UpdateBroadcastResponse, error) {
 	if params.BroadcastId == "" {
 		return UpdateBroadcastResponse{}, errors.New("[ERROR]: BroadcastId cannot be empty")
@@ -417,7 +467,7 @@ func (s *BroadcastsSvcImpl) Update(params *UpdateBroadcastRequest) (UpdateBroadc
 }
 
 // GetWithContext Retrieve a single broadcast.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) GetWithContext(ctx context.Context, broadcastId string) (Broadcast, error) {
 
 	if broadcastId == "" {
@@ -450,7 +500,7 @@ func (s *BroadcastsSvcImpl) Get(broadcastId string) (Broadcast, error) {
 }
 
 // SendWithContext Sends broadcasts to your audience.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) SendWithContext(ctx context.Context, params *SendBroadcastRequest) (SendBroadcastResponse, error) {
 	if params.BroadcastId == "" {
 		return SendBroadcastResponse{}, errors.New("[ERROR]: BroadcastId cannot be empty")
@@ -512,7 +562,7 @@ func (s *BroadcastsSvcImpl) Cancel(broadcastId string) (CancelBroadcastResponse,
 }
 
 // DuplicateWithContext duplicates a broadcast by id, creating a new draft named after the source with " (copy)" appended
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) DuplicateWithContext(ctx context.Context, broadcastId string) (DuplicateBroadcastResponse, error) {
 	if broadcastId == "" {
 		return DuplicateBroadcastResponse{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -540,7 +590,7 @@ func (s *BroadcastsSvcImpl) Duplicate(broadcastId string) (DuplicateBroadcastRes
 }
 
 // RemoveWithContext removes a given broadcast by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) RemoveWithContext(ctx context.Context, broadcastId string) (RemoveBroadcastResponse, error) {
 	path := "broadcasts/" + broadcastId
 
@@ -568,7 +618,7 @@ func (s *BroadcastsSvcImpl) Remove(broadcastId string) (RemoveBroadcastResponse,
 }
 
 // ListWithOptions returns the list of all broadcasts with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListBroadcastsResponse, error) {
 	path := "broadcasts" + buildPaginationQuery(options)
 
@@ -592,7 +642,7 @@ func (s *BroadcastsSvcImpl) ListWithOptions(ctx context.Context, options *ListOp
 
 // ListWithFilters returns broadcasts filtered by status, segment or a name
 // search, with pagination options.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ListWithFilters(ctx context.Context, options *ListBroadcastsOptions) (ListBroadcastsResponse, error) {
 	path := "broadcasts"
 	if options != nil {
@@ -618,7 +668,7 @@ func (s *BroadcastsSvcImpl) ListWithFilters(ctx context.Context, options *ListBr
 }
 
 // ListWithContext returns the list of all broadcasts
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ListWithContext(ctx context.Context) (ListBroadcastsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
@@ -630,7 +680,7 @@ func (s *BroadcastsSvcImpl) List() (ListBroadcastsResponse, error) {
 
 // RecipientsWithContext returns a broadcast's recipients for a given event type, such as who
 // opened, clicked, or bounced.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) RecipientsWithContext(ctx context.Context, broadcastId string, options *ListBroadcastRecipientsOptions) (ListBroadcastRecipientsResponse, error) {
 	if broadcastId == "" {
 		return ListBroadcastRecipientsResponse{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -685,7 +735,7 @@ func (s *BroadcastsSvcImpl) Recipients(broadcastId string, options *ListBroadcas
 }
 
 // ClickedLinksWithOptions returns the clicked links for a broadcast with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ClickedLinksWithOptions(ctx context.Context, broadcastId string, options *ListOptions) (ListBroadcastClickedLinksResponse, error) {
 	if broadcastId == "" {
 		return ListBroadcastClickedLinksResponse{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -712,7 +762,7 @@ func (s *BroadcastsSvcImpl) ClickedLinksWithOptions(ctx context.Context, broadca
 }
 
 // ClickedLinksWithContext returns the clicked links for a broadcast
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ClickedLinksWithContext(ctx context.Context, broadcastId string) (ListBroadcastClickedLinksResponse, error) {
 	return s.ClickedLinksWithOptions(ctx, broadcastId, nil)
 }
@@ -860,7 +910,7 @@ func (s *BroadcastsSvcImpl) do(ctx context.Context, method, path string, body, o
 
 // EstimateWithContext counts the contacts an audience reaches now, before
 // anything is saved.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) EstimateWithContext(ctx context.Context, params *EstimateBroadcastRequest) (BroadcastEstimate, error) {
 	if params == nil {
 		params = &EstimateBroadcastRequest{}
@@ -879,7 +929,7 @@ func (s *BroadcastsSvcImpl) Estimate(params *EstimateBroadcastRequest) (Broadcas
 
 // SendTestWithContext sends a broadcast's current content to 1 to 5 test
 // addresses.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) SendTestWithContext(ctx context.Context, broadcastId string, params *SendBroadcastTestRequest) (SendBroadcastTestResponse, error) {
 	if broadcastId == "" {
 		return SendBroadcastTestResponse{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -900,7 +950,7 @@ func (s *BroadcastsSvcImpl) SendTest(broadcastId string, params *SendBroadcastTe
 }
 
 // StatsWithContext returns a broadcast's delivery and engagement stats.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) StatsWithContext(ctx context.Context, broadcastId string) (BroadcastStats, error) {
 	if broadcastId == "" {
 		return BroadcastStats{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -918,7 +968,7 @@ func (s *BroadcastsSvcImpl) Stats(broadcastId string) (BroadcastStats, error) {
 }
 
 // ListVersionsWithOptions lists a broadcast's saved versions, newest first.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) ListVersionsWithOptions(ctx context.Context, broadcastId string, options *ListOptions) (ListBroadcastVersionsResponse, error) {
 	if broadcastId == "" {
 		return ListBroadcastVersionsResponse{}, errors.New("[ERROR]: broadcastId cannot be empty")
@@ -947,7 +997,7 @@ func versionPath(broadcastId, version string) (string, error) {
 
 // GetVersionWithContext returns one saved version of a broadcast with its
 // content and audience. version is a version id or its version number ("3").
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) GetVersionWithContext(ctx context.Context, broadcastId, version string) (BroadcastVersion, error) {
 	path, err := versionPath(broadcastId, version)
 	if err != nil {
@@ -966,7 +1016,7 @@ func (s *BroadcastsSvcImpl) GetVersion(broadcastId, version string) (BroadcastVe
 }
 
 // UpdateVersionWithContext sets a version's name and comment.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) UpdateVersionWithContext(ctx context.Context, broadcastId, version string, params *UpdateBroadcastVersionRequest) (BroadcastVersion, error) {
 	path, err := versionPath(broadcastId, version)
 	if err != nil {
@@ -989,7 +1039,7 @@ func (s *BroadcastsSvcImpl) UpdateVersion(broadcastId, version string, params *U
 
 // RestoreVersionWithContext copies a saved version back into a draft or
 // scheduled broadcast and returns the new version it records.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BroadcastsSvcImpl) RestoreVersionWithContext(ctx context.Context, broadcastId, version string) (BroadcastVersion, error) {
 	path, err := versionPath(broadcastId, version)
 	if err != nil {

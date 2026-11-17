@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
+	sendio "github.com/send-io/sendio-go"
 	"github.com/spf13/cobra"
-	sendio "send.io/sendio-go"
 
 	"send.io/cli/internal/api"
 	"send.io/cli/internal/out"
@@ -31,6 +31,7 @@ func (a *App) SDK(c *api.Client) *sendio.Client {
 
 type sendFlags struct {
 	from, subject, html, text, template, data, scheduledAt, idem, topic, wait string
+	transactional                                                             string
 	to, cc, bcc, replyTo, vars, attach, headers, tags                         []string
 	timeout, interval                                                         time.Duration
 }
@@ -40,7 +41,7 @@ func (a *App) addEmailCommands(root *cobra.Command) {
 	var f sendFlags
 	send := &cobra.Command{
 		Use:   "send",
-		Short: "Send an email (inline content or a template), optionally waiting for delivery",
+		Short: "Send an email (inline content, a template or a transactional email), optionally waiting for delivery",
 		Long: `Send an email.
 
 Content: --html/--text take a string, @file or - (stdin). Or --template
@@ -48,6 +49,11 @@ Content: --html/--text take a string, @file or - (stdin). Or --template
 --data @vars.json (with --template, --data is the variables object; without
 it, --data is the raw request body and flags override its fields).
 --template alias@3 renders version 3 and sends the result inline.
+
+--transactional tx_... sends a transactional email: it sets the sender,
+subject, reply-to and content (its template's published version), so
+--from, --subject, --reply-to, --html, --text and --template are refused.
+--var and --data give its variables.
 
 --wait delivered|bounced|sent|opened|clicked|any polls the email until its
 last event matches (exit 0), a terminal failure happens (exit 1) or
@@ -57,6 +63,7 @@ API: POST /emails  (MCP tool: send-email)`,
 		Example: `  sendio emails send --from "Acme <hi@acme.dev>" --to ada@example.com --subject Hi --text "Hello"
   sendio emails send --from hi@acme.dev --to a@x.dev,b@x.dev --html @mail.html --subject Report --attach ./report.pdf
   sendio emails send --template welcome --var name=Ada --to ada@example.com --wait delivered
+  sendio emails send --transactional tx_2hX9Yq1bVv0kq3W4m8sZJt1aB7c --to ada@example.com --var CODE=123456
   echo "<p>hi</p>" | sendio emails send --from hi@acme.dev --to ada@example.com --subject Hi --html -
   sendio emails send ... --scheduled-at "in 1h" --idempotency-key auto`,
 		Args:        cobra.NoArgs,
@@ -75,8 +82,9 @@ API: POST /emails  (MCP tool: send-email)`,
 	fl.StringVar(&f.html, "html", "", "HTML body: a string, @file or - for stdin")
 	fl.StringVar(&f.text, "text", "", "plain-text body: a string, @file or - for stdin")
 	fl.StringVar(&f.template, "template", "", "published template id or alias, optionally @version")
+	fl.StringVar(&f.transactional, "transactional", "", "transactional email id (tx_...): it sets the sender, subject and content")
 	fl.StringArrayVar(&f.vars, "var", nil, "template variable key=value (key:=json for numbers/booleans; repeatable)")
-	fl.StringVar(&f.data, "data", "", "with --template: variables JSON (@file, - or literal); otherwise the raw request body")
+	fl.StringVar(&f.data, "data", "", "with --template or --transactional: variables JSON (@file, - or literal); otherwise the raw request body")
 	fl.StringArrayVar(&f.attach, "attach", nil, "attach a file (path or https URL; repeatable)")
 	fl.StringArrayVar(&f.headers, "header", nil, "custom header Name=value (repeatable)")
 	fl.StringArrayVar(&f.tags, "tag", nil, "tag name=value (repeatable)")
@@ -177,6 +185,20 @@ func (a *App) emailsSend(cmd *cobra.Command, f *sendFlags) error {
 	default:
 		return api.UsageError("--wait must be delivered, bounced, sent, opened, clicked or any")
 	}
+	if f.transactional != "" {
+		if f.template != "" {
+			return api.UsageError("--transactional and --template cannot be combined: the transactional email names its template")
+		}
+		for _, x := range []struct {
+			flag string
+			set  bool
+		}{{"--from", f.from != ""}, {"--subject", f.subject != ""}, {"--reply-to", len(f.replyTo) > 0}, {"--html", f.html != ""}, {"--text", f.text != ""}} {
+			if x.set {
+				return api.UsageError("%s cannot be combined with --transactional: the transactional email sets it", x.flag)
+			}
+		}
+	}
+	withVars := f.template != "" || f.transactional != ""
 	body := map[string]any{}
 	vars := map[string]any{}
 	if f.data != "" {
@@ -188,7 +210,7 @@ func (a *App) emailsSend(cmd *cobra.Command, f *sendFlags) error {
 		if !ok {
 			return api.UsageError("--data must be a JSON object")
 		}
-		if f.template != "" {
+		if withVars {
 			vars = m
 		} else {
 			body = m
@@ -201,8 +223,8 @@ func (a *App) emailsSend(cmd *cobra.Command, f *sendFlags) error {
 		}
 		vars[k] = v
 	}
-	if len(f.vars) > 0 && f.template == "" {
-		return api.UsageError("--var needs --template")
+	if len(f.vars) > 0 && !withVars {
+		return api.UsageError("--var needs --template or --transactional")
 	}
 	setList := func(key string, vals []string) {
 		if l := splitList(vals); len(l) > 0 {
@@ -286,6 +308,12 @@ func (a *App) emailsSend(cmd *cobra.Command, f *sendFlags) error {
 	c, err := a.Client(true)
 	if err != nil {
 		return err
+	}
+	if f.transactional != "" {
+		body["transactional_id"] = f.transactional
+		if len(vars) > 0 {
+			body["variables"] = vars
+		}
 	}
 	if f.template != "" {
 		id, version := splitTemplateRef(f.template)

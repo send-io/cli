@@ -63,7 +63,7 @@ type Segment struct {
 }
 
 // CreateWithContext creates a new Segment entry based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) CreateWithContext(ctx context.Context, params *CreateSegmentRequest) (CreateSegmentResponse, error) {
 	path := "segments"
 
@@ -87,13 +87,13 @@ func (s *SegmentsSvcImpl) CreateWithContext(ctx context.Context, params *CreateS
 }
 
 // Create creates a new Segment entry based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) Create(params *CreateSegmentRequest) (CreateSegmentResponse, error) {
 	return s.CreateWithContext(context.Background(), params)
 }
 
 // ListWithOptions returns the list of all segments with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListSegmentsResponse, error) {
 	path := "segments" + buildPaginationQuery(options)
 
@@ -116,19 +116,19 @@ func (s *SegmentsSvcImpl) ListWithOptions(ctx context.Context, options *ListOpti
 }
 
 // ListWithContext returns the list of all segments
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) ListWithContext(ctx context.Context) (ListSegmentsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
 
 // List returns the list of all segments
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) List() (ListSegmentsResponse, error) {
 	return s.ListWithContext(context.Background())
 }
 
 // RemoveWithContext removes a given segment by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) RemoveWithContext(ctx context.Context, segmentId string) (RemoveSegmentResponse, error) {
 	path := "segments/" + segmentId
 
@@ -151,13 +151,13 @@ func (s *SegmentsSvcImpl) RemoveWithContext(ctx context.Context, segmentId strin
 }
 
 // Remove removes a given segment entry by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) Remove(segmentId string) (RemoveSegmentResponse, error) {
 	return s.RemoveWithContext(context.Background(), segmentId)
 }
 
 // GetWithContext Retrieve a single segment.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) GetWithContext(ctx context.Context, segmentId string) (Segment, error) {
 	path := "segments/" + segmentId
 
@@ -180,13 +180,13 @@ func (s *SegmentsSvcImpl) GetWithContext(ctx context.Context, segmentId string) 
 }
 
 // Get Retrieve a single segment.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) Get(segmentId string) (Segment, error) {
 	return s.GetWithContext(context.Background(), segmentId)
 }
 
 // UpdateWithContext updates a segment by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) UpdateWithContext(ctx context.Context, segmentId string, params *UpdateSegmentRequest) (UpdateSegmentResponse, error) {
 	if segmentId == "" {
 		return UpdateSegmentResponse{}, errors.New("[ERROR]: segmentId cannot be empty")
@@ -215,7 +215,7 @@ func (s *SegmentsSvcImpl) UpdateWithContext(ctx context.Context, segmentId strin
 }
 
 // Update updates a segment by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SegmentsSvcImpl) Update(segmentId string, params *UpdateSegmentRequest) (UpdateSegmentResponse, error) {
 	return s.UpdateWithContext(context.Background(), segmentId, params)
 }

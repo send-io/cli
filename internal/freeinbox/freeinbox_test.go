@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -277,6 +278,44 @@ func TestExtractCode(t *testing.T) {
 	}
 }
 
+// TestRiskyExtMatchesConsole guards the KEEP IN SYNC rule: riskyExt must be
+// the same set as RISKY_EXTENSIONS in the console and Node SDK core.ts.
+func TestRiskyExtMatchesConsole(t *testing.T) {
+	quoted := regexp.MustCompile(`'([a-z0-9-]+)'`)
+	for _, rel := range []string{
+		"../../../frontend/console/src/modules/free-inbox/core.ts",
+		"../../../sdks/node/src/inbox/core.ts",
+	} {
+		src, err := os.ReadFile(rel)
+		if os.IsNotExist(err) {
+			t.Skipf("%s not in this checkout", rel)
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		body := string(src)
+		start := strings.Index(body, "export const RISKY_EXTENSIONS = [")
+		if start < 0 {
+			t.Fatalf("%s: RISKY_EXTENSIONS not found", rel)
+		}
+		end := strings.Index(body[start:], "];")
+		got := map[string]bool{}
+		for _, m := range quoted.FindAllStringSubmatch(body[start:start+end], -1) {
+			got[m[1]] = true
+		}
+		for e := range riskyExt {
+			if !got[e] {
+				t.Errorf("%s: missing %q (in parse.go riskyExt)", rel, e)
+			}
+		}
+		for e := range got {
+			if !riskyExt[e] {
+				t.Errorf("parse.go riskyExt: missing %q (in %s)", e, rel)
+			}
+		}
+	}
+}
+
 func TestRisky(t *testing.T) {
 	var zb bytes.Buffer
 	zw := zip.NewWriter(&zb)
@@ -302,6 +341,19 @@ func TestRisky(t *testing.T) {
 		{"a.rar", []byte("Rar!\x1a\x07\x01\x00....run.vbs...."), true},
 		{"b.rar", []byte("Rar!\x1a\x07\x01\x00....readme.txt...."), false},
 		{"run.js", nil, true},
+		// SENDIO-695: browser, script and installer types.
+		{"invoice.HTML", nil, true},
+		{"logo.svg", nil, true},
+		{"run.sh", nil, true},
+		{"Setup.dmg", nil, true},
+		{"open.command", nil, true},
+		{"x.appref-ms", nil, true},
+		{"settings.ps1xml", nil, true},
+		{"photo.png", nil, false},
+		{"data.csv", nil, false},
+		{"c.7z", []byte("7z\xbc\xaf\x27\x1c....page.htm\x00...."), true},
+		{"d.rar", []byte("Rar!\x1a\x07\x01\x00....install.pkg...."), true},
+		{"e.rar", []byte("Rar!\x1a\x07\x01\x00....page.shtmlx...."), false},
 	}
 	for _, c := range cases {
 		if got := Risky(c.name, c.data); got != c.want {

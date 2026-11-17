@@ -1,6 +1,6 @@
 // Package api is the CLI's HTTP layer: auth headers, automatic token refresh
 // on 401, --dry-run interception, typed errors with exit codes and cursor
-// pagination. Typed SDK calls (send.io/sendio-go) run through the same
+// pagination. Typed SDK calls (github.com/send-io/sendio-go) run through the same
 // layer via Client.Transport.
 package api
 

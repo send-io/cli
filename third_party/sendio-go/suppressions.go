@@ -110,7 +110,7 @@ type SuppressionsSvcImpl struct {
 
 // Add suppresses an email address. The API lowercases and trims the address, and the call is an
 // upsert: re-adding an already-suppressed address succeeds and returns the existing ID.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) Add(params *AddSuppressionRequest) (AddSuppressionResponse, error) {
 	return s.AddWithContext(context.Background(), params)
 }
@@ -118,7 +118,7 @@ func (s *SuppressionsSvcImpl) Add(params *AddSuppressionRequest) (AddSuppression
 // AddWithContext suppresses an email address with context. The API lowercases and trims the
 // address, and the call is an upsert: re-adding an already-suppressed address succeeds and returns
 // the existing ID.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) AddWithContext(ctx context.Context, params *AddSuppressionRequest) (AddSuppressionResponse, error) {
 	if params == nil || params.Email == "" {
 		return AddSuppressionResponse{}, errors.New("[ERROR]: Email is required")
@@ -138,13 +138,13 @@ func (s *SuppressionsSvcImpl) AddWithContext(ctx context.Context, params *AddSup
 }
 
 // List retrieves a list of suppressions.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) List(options *ListSuppressionsOptions) (ListSuppressionsResponse, error) {
 	return s.ListWithContext(context.Background(), options)
 }
 
 // ListWithContext retrieves a list of suppressions with context.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) ListWithContext(ctx context.Context, options *ListSuppressionsOptions) (ListSuppressionsResponse, error) {
 	if options == nil {
 		options = &ListSuppressionsOptions{}
@@ -184,7 +184,7 @@ func (s *SuppressionsSvcImpl) ListWithContext(ctx context.Context, options *List
 
 // Get retrieves a single suppression. The idOrEmail param can be either a suppression ID or an
 // email address. An unknown identifier returns a 404 "Suppression not found" error.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) Get(idOrEmail string) (Suppression, error) {
 	return s.GetWithContext(context.Background(), idOrEmail)
 }
@@ -192,7 +192,7 @@ func (s *SuppressionsSvcImpl) Get(idOrEmail string) (Suppression, error) {
 // GetWithContext retrieves a single suppression with context. The idOrEmail param can be either a
 // suppression ID or an email address. An unknown identifier returns a 404 "Suppression not found"
 // error.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) GetWithContext(ctx context.Context, idOrEmail string) (Suppression, error) {
 	if idOrEmail == "" {
 		return Suppression{}, errors.New("[ERROR]: Id or email is required")
@@ -215,7 +215,7 @@ func (s *SuppressionsSvcImpl) GetWithContext(ctx context.Context, idOrEmail stri
 
 // Remove removes a single suppression. The idOrEmail param can be either a suppression ID or an
 // email address. An unknown identifier returns a 404 "Suppression not found" error.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) Remove(idOrEmail string) (RemoveSuppressionResponse, error) {
 	return s.RemoveWithContext(context.Background(), idOrEmail)
 }
@@ -223,7 +223,7 @@ func (s *SuppressionsSvcImpl) Remove(idOrEmail string) (RemoveSuppressionRespons
 // RemoveWithContext removes a single suppression with context. The idOrEmail param can be either a
 // suppression ID or an email address. An unknown identifier returns a 404 "Suppression not found"
 // error.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsSvcImpl) RemoveWithContext(ctx context.Context, idOrEmail string) (RemoveSuppressionResponse, error) {
 	if idOrEmail == "" {
 		return RemoveSuppressionResponse{}, errors.New("[ERROR]: Id or email is required")
@@ -258,7 +258,7 @@ type SuppressionsBatchSvcImpl struct {
 // Add suppresses up to 100 email addresses at once. The API lowercases, trims and dedupes the
 // addresses, and upserts them, so already-suppressed addresses succeed and return their existing
 // IDs. The returned data can therefore be shorter than Emails.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsBatchSvcImpl) Add(params *BatchAddSuppressionsRequest) (BatchAddSuppressionsResponse, error) {
 	return s.AddWithContext(context.Background(), params)
 }
@@ -266,7 +266,7 @@ func (s *SuppressionsBatchSvcImpl) Add(params *BatchAddSuppressionsRequest) (Bat
 // AddWithContext suppresses up to 100 email addresses at once with context. The API lowercases,
 // trims and dedupes the addresses, and upserts them, so already-suppressed addresses succeed and
 // return their existing IDs. The returned data can therefore be shorter than Emails.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsBatchSvcImpl) AddWithContext(ctx context.Context, params *BatchAddSuppressionsRequest) (BatchAddSuppressionsResponse, error) {
 	if params == nil || len(params.Emails) == 0 {
 		return BatchAddSuppressionsResponse{}, errors.New("[ERROR]: Emails is required")
@@ -288,7 +288,7 @@ func (s *SuppressionsBatchSvcImpl) AddWithContext(ctx context.Context, params *B
 // Remove removes up to 100 suppressions at once, by email address or by ID. Unlike the single
 // Remove, identifiers that are not suppressed are not an error: the returned data only covers the
 // entries that were actually deleted.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsBatchSvcImpl) Remove(params *BatchRemoveSuppressionsRequest) (BatchRemoveSuppressionsResponse, error) {
 	return s.RemoveWithContext(context.Background(), params)
 }
@@ -296,7 +296,7 @@ func (s *SuppressionsBatchSvcImpl) Remove(params *BatchRemoveSuppressionsRequest
 // RemoveWithContext removes up to 100 suppressions at once with context, by email address or by ID.
 // Unlike the single RemoveWithContext, identifiers that are not suppressed are not an error: the
 // returned data only covers the entries that were actually deleted.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *SuppressionsBatchSvcImpl) RemoveWithContext(ctx context.Context, params *BatchRemoveSuppressionsRequest) (BatchRemoveSuppressionsResponse, error) {
 	if params == nil || (len(params.Emails) == 0 && len(params.Ids) == 0) {
 		return BatchRemoveSuppressionsResponse{}, errors.New("[ERROR]: Either Emails or Ids is required")

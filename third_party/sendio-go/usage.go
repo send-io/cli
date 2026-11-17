@@ -81,7 +81,7 @@ type Usage struct {
 }
 
 // GetWithContext retrieves the caller's account-level usage and quota data.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *UsageSvcImpl) GetWithContext(ctx context.Context) (Usage, error) {
 	path := "usage"
 
@@ -104,7 +104,7 @@ func (s *UsageSvcImpl) GetWithContext(ctx context.Context) (Usage, error) {
 }
 
 // Get retrieves the caller's account-level usage and quota data.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *UsageSvcImpl) Get() (Usage, error) {
 	return s.GetWithContext(context.Background())
 }

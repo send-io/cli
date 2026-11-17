@@ -55,7 +55,7 @@ type ApiKeysSvcImpl struct {
 }
 
 // CreateWithContext creates a new API Key based on the given params
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ApiKeysSvcImpl) CreateWithContext(ctx context.Context, params *CreateApiKeyRequest) (CreateApiKeyResponse, error) {
 	path := "api-keys"
 
@@ -84,7 +84,7 @@ func (s *ApiKeysSvcImpl) Create(params *CreateApiKeyRequest) (CreateApiKeyRespon
 }
 
 // ListWithOptions list all API Keys in the project with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ApiKeysSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListApiKeysResponse, error) {
 	path := "api-keys" + buildPaginationQuery(options)
 
@@ -108,7 +108,7 @@ func (s *ApiKeysSvcImpl) ListWithOptions(ctx context.Context, options *ListOptio
 }
 
 // ListWithContext list all API Keys in the project
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ApiKeysSvcImpl) ListWithContext(ctx context.Context) (ListApiKeysResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
@@ -119,7 +119,7 @@ func (s *ApiKeysSvcImpl) List() (ListApiKeysResponse, error) {
 }
 
 // RemoveWithContext deletes a given api key by id
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ApiKeysSvcImpl) RemoveWithContext(ctx context.Context, apiKeyId string) (bool, error) {
 	path := "api-keys/" + apiKeyId
 
@@ -144,7 +144,7 @@ func (s *ApiKeysSvcImpl) Remove(apiKeyId string) (bool, error) {
 	return s.RemoveWithContext(context.Background(), apiKeyId)
 }
 
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ApiKeysSvcImpl) UpdateWithContext(ctx context.Context, apiKeyId string, params *UpdateApiKeyRequest) (UpdateApiKeyResponse, error) {
 	path := "api-keys/" + apiKeyId
 

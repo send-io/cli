@@ -26,7 +26,7 @@ func jsonLine(v any) (string, error) {
 // openTargets are the pages `sendio open` knows (paths on the web app).
 var openTargets = map[string]string{
 	"dashboard": "/", "logs": "/logs", "domains": "/domains", "api-keys": "/api-keys", "docs": "/docs",
-	"emails": "/emails", "templates": "/templates", "contacts": "/contacts", "broadcasts": "/broadcasts",
+	"emails": "/emails", "templates": "/templates", "transactional": "/transactional", "contacts": "/contacts", "broadcasts": "/broadcasts",
 	"webhooks": "/webhooks", "automations": "/automations", "settings": "/settings", "mcp": "/docs/mcp",
 }
 

@@ -88,7 +88,7 @@ type ReceivingSvcImpl struct {
 }
 
 // GetWithOptions retrieves a received email with the given emailId and optional query parameters
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) GetWithOptions(ctx context.Context, emailId string, params *GetReceivedEmailParams) (*ReceivedEmail, error) {
 	path := "emails/receiving/" + emailId
 
@@ -114,19 +114,19 @@ func (s *ReceivingSvcImpl) GetWithOptions(ctx context.Context, emailId string, p
 }
 
 // GetWithContext retrieves a received email with the given emailId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) GetWithContext(ctx context.Context, emailId string) (*ReceivedEmail, error) {
 	return s.GetWithOptions(ctx, emailId, nil)
 }
 
 // Get retrieves a received email with the given emailId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) Get(emailId string) (*ReceivedEmail, error) {
 	return s.GetWithOptions(context.Background(), emailId, nil)
 }
 
 // ListWithOptions retrieves a list of received emails with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) ListWithOptions(ctx context.Context, options *ListOptions) (ListReceivedEmailsResponse, error) {
 	path := "emails/receiving" + buildPaginationQuery(options)
 
@@ -147,19 +147,19 @@ func (s *ReceivingSvcImpl) ListWithOptions(ctx context.Context, options *ListOpt
 }
 
 // ListWithContext retrieves a list of received emails
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) ListWithContext(ctx context.Context) (ListReceivedEmailsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
 
 // List retrieves a list of received emails
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) List() (ListReceivedEmailsResponse, error) {
 	return s.ListWithContext(context.Background())
 }
 
 // GetAttachmentWithContext retrieves a single attachment from a received email with the given emailId and attachmentId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) GetAttachmentWithContext(ctx context.Context, emailId string, attachmentId string) (*EmailAttachment, error) {
 	path := "emails/receiving/" + emailId + "/attachments/" + attachmentId
 
@@ -182,13 +182,13 @@ func (s *ReceivingSvcImpl) GetAttachmentWithContext(ctx context.Context, emailId
 }
 
 // GetAttachment retrieves a single attachment from a received email with the given emailId and attachmentId
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) GetAttachment(emailId string, attachmentId string) (*EmailAttachment, error) {
 	return s.GetAttachmentWithContext(context.Background(), emailId, attachmentId)
 }
 
 // ListAttachmentsWithOptions retrieves a list of attachments for a received email with pagination options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) ListAttachmentsWithOptions(ctx context.Context, emailId string, options *ListOptions) (ListEmailAttachmentsResponse, error) {
 	path := "emails/receiving/" + emailId + "/attachments" + buildPaginationQuery(options)
 
@@ -212,13 +212,13 @@ func (s *ReceivingSvcImpl) ListAttachmentsWithOptions(ctx context.Context, email
 }
 
 // ListAttachmentsWithContext retrieves a list of attachments for a received email
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) ListAttachmentsWithContext(ctx context.Context, emailId string) (ListEmailAttachmentsResponse, error) {
 	return s.ListAttachmentsWithOptions(ctx, emailId, nil)
 }
 
 // ListAttachments retrieves a list of attachments for a received email
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *ReceivingSvcImpl) ListAttachments(emailId string) (ListEmailAttachmentsResponse, error) {
 	return s.ListAttachmentsWithContext(context.Background(), emailId)
 }

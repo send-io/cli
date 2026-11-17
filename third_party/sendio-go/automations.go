@@ -235,12 +235,17 @@ type AutomationRun struct {
 type AutomationTemplateCategory = string
 
 const (
-	AutomationTemplateCategoryOnboarding  AutomationTemplateCategory = "onboarding"
-	AutomationTemplateCategoryBilling     AutomationTemplateCategory = "billing"
-	AutomationTemplateCategoryEcommerce   AutomationTemplateCategory = "ecommerce"
-	AutomationTemplateCategoryEngagement  AutomationTemplateCategory = "engagement"
-	AutomationTemplateCategoryLeadCapture AutomationTemplateCategory = "lead_capture"
-	AutomationTemplateCategoryInternal    AutomationTemplateCategory = "internal"
+	AutomationTemplateCategoryOnboarding   AutomationTemplateCategory = "onboarding"
+	AutomationTemplateCategoryBilling      AutomationTemplateCategory = "billing"
+	AutomationTemplateCategoryEcommerce    AutomationTemplateCategory = "ecommerce"
+	AutomationTemplateCategoryEngagement   AutomationTemplateCategory = "engagement"
+	AutomationTemplateCategoryLeadCapture  AutomationTemplateCategory = "lead_capture"
+	AutomationTemplateCategoryAppointments AutomationTemplateCategory = "appointments"
+	AutomationTemplateCategoryEvents       AutomationTemplateCategory = "events"
+	AutomationTemplateCategoryEducation    AutomationTemplateCategory = "education"
+	AutomationTemplateCategoryAccount      AutomationTemplateCategory = "account"
+	AutomationTemplateCategoryNonprofit    AutomationTemplateCategory = "nonprofit"
+	AutomationTemplateCategoryInternal     AutomationTemplateCategory = "internal"
 )
 
 type AutomationTemplateKind = string
@@ -523,7 +528,7 @@ func buildAutomationRunsQuery(options *ListAutomationRunsOptions) string {
 }
 
 // CreateWithContext creates a new Automation
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) CreateWithContext(ctx context.Context, params *CreateAutomationRequest) (CreateAutomationResponse, error) {
 	req, err := s.client.NewRequest(ctx, http.MethodPost, "automations", params)
 	if err != nil {
@@ -545,7 +550,7 @@ func (s *AutomationsSvcImpl) Create(params *CreateAutomationRequest) (CreateAuto
 }
 
 // GetWithContext retrieves a single Automation by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) GetWithContext(ctx context.Context, automationId string) (Automation, error) {
 	path := "automations/" + automationId
 
@@ -569,7 +574,7 @@ func (s *AutomationsSvcImpl) Get(automationId string) (Automation, error) {
 }
 
 // ListWithOptions retrieves a list of Automations with pagination and filter options
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) ListWithOptions(ctx context.Context, options *ListAutomationsOptions) (ListAutomationsResponse, error) {
 	path := "automations" + buildAutomationsQuery(options)
 
@@ -588,7 +593,7 @@ func (s *AutomationsSvcImpl) ListWithOptions(ctx context.Context, options *ListA
 }
 
 // ListWithContext retrieves a list of Automations
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) ListWithContext(ctx context.Context) (ListAutomationsResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
@@ -599,7 +604,7 @@ func (s *AutomationsSvcImpl) List() (ListAutomationsResponse, error) {
 }
 
 // UpdateWithContext updates an existing Automation
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) UpdateWithContext(ctx context.Context, automationId string, params *UpdateAutomationRequest) (UpdateAutomationResponse, error) {
 	path := "automations/" + automationId
 
@@ -623,7 +628,7 @@ func (s *AutomationsSvcImpl) Update(automationId string, params *UpdateAutomatio
 }
 
 // RemoveWithContext deletes an Automation by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) RemoveWithContext(ctx context.Context, automationId string) (DeleteAutomationResponse, error) {
 	path := "automations/" + automationId
 
@@ -647,7 +652,7 @@ func (s *AutomationsSvcImpl) Remove(automationId string) (DeleteAutomationRespon
 }
 
 // DuplicateWithContext duplicates an Automation by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) DuplicateWithContext(ctx context.Context, automationId string) (DuplicateAutomationResponse, error) {
 	path := "automations/" + automationId + "/duplicate"
 
@@ -671,7 +676,7 @@ func (s *AutomationsSvcImpl) Duplicate(automationId string) (DuplicateAutomation
 }
 
 // StopWithContext stops a running Automation by ID
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) StopWithContext(ctx context.Context, automationId string) (StopAutomationResponse, error) {
 	path := "automations/" + automationId + "/stop"
 
@@ -695,7 +700,7 @@ func (s *AutomationsSvcImpl) Stop(automationId string) (StopAutomationResponse, 
 }
 
 // ListRunsWithContext retrieves a list of runs for an Automation
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) ListRunsWithContext(ctx context.Context, automationId string, options *ListAutomationRunsOptions) (ListAutomationRunsResponse, error) {
 	path := "automations/" + automationId + "/runs" + buildAutomationRunsQuery(options)
 
@@ -719,7 +724,7 @@ func (s *AutomationsSvcImpl) ListRuns(automationId string) (ListAutomationRunsRe
 }
 
 // GetRunWithContext retrieves a single run for an Automation
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) GetRunWithContext(ctx context.Context, automationId string, runId string) (AutomationRun, error) {
 	path := "automations/" + automationId + "/runs/" + runId
 
@@ -745,7 +750,7 @@ func (s *AutomationsSvcImpl) GetRun(automationId string, runId string) (Automati
 // CreateFromTemplateWithOptions sets up an automation template in one go: the
 // events your team does not have, the workflow's emails and the automation,
 // which is created disabled. Pass an IdempotencyKey to make retries safe.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) CreateFromTemplateWithOptions(ctx context.Context, params *CreateAutomationFromTemplateRequest, options *CreateAutomationFromTemplateOptions) (CreateAutomationFromTemplateResponse, error) {
 	var opts Options
 	if options != nil {
@@ -766,7 +771,7 @@ func (s *AutomationsSvcImpl) CreateFromTemplateWithOptions(ctx context.Context, 
 }
 
 // CreateFromTemplateWithContext creates an Automation from an automation template
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationsSvcImpl) CreateFromTemplateWithContext(ctx context.Context, params *CreateAutomationFromTemplateRequest) (CreateAutomationFromTemplateResponse, error) {
 	return s.CreateFromTemplateWithOptions(ctx, params, nil)
 }
@@ -787,7 +792,7 @@ func buildAutomationTemplatesQuery(options *ListAutomationTemplatesOptions) stri
 
 // ListWithOptions retrieves the automation templates, optionally of one category.
 // The list is not paginated.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationTemplatesSvcImpl) ListWithOptions(ctx context.Context, options *ListAutomationTemplatesOptions) (ListAutomationTemplatesResponse, error) {
 	path := "automation-templates" + buildAutomationTemplatesQuery(options)
 
@@ -806,7 +811,7 @@ func (s *AutomationTemplatesSvcImpl) ListWithOptions(ctx context.Context, option
 }
 
 // ListWithContext retrieves every automation template
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationTemplatesSvcImpl) ListWithContext(ctx context.Context) (ListAutomationTemplatesResponse, error) {
 	return s.ListWithOptions(ctx, nil)
 }
@@ -818,7 +823,7 @@ func (s *AutomationTemplatesSvcImpl) List() (ListAutomationTemplatesResponse, er
 
 // GetWithContext retrieves one automation template in full by slug: its
 // steps, emails (with your team's brand), params and events.
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *AutomationTemplatesSvcImpl) GetWithContext(ctx context.Context, slug string) (AutomationTemplate, error) {
 	path := "automation-templates/" + slug
 

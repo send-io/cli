@@ -54,7 +54,7 @@ type BatchError struct {
 }
 
 // BatchEmailResponse is the response from the BatchSendEmail call.
-// see https://send.io/docs/api
+// see https://developer.send.io/docs/api
 type BatchEmailResponse struct {
 	Data   []SendEmailResponse `json:"data"`
 	Errors []BatchError        `json:"errors,omitempty"`
@@ -71,7 +71,7 @@ type BatchSvcImpl struct {
 }
 
 // Send send a batch of emails
-// https://send.io/docs/api
+// https://developer.send.io/docs/api
 func (s *BatchSvcImpl) Send(params []*SendEmailRequest) (*BatchEmailResponse, error) {
 	return s.SendWithContext(context.Background(), params)
 }

@@ -1,4 +1,4 @@
-module send.io/sendio-go
+module github.com/send-io/sendio-go
 
 go 1.23
 

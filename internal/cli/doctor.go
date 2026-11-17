@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	sendio "github.com/send-io/sendio-go"
 	"github.com/spf13/cobra"
-	sendio "send.io/sendio-go"
 
 	"send.io/cli/internal/api"
 	"send.io/cli/internal/build"
