@@ -15,9 +15,15 @@ on:
   push:
     tags:
       - 'v*'
+  # A manual run only checks that npm accepts this workflow's sign-in for each
+  # package. It builds and publishes nothing. Run it before tagging: a failed
+  # release job must not be rerun (goreleaser would run again on a published
+  # release), so the npm sign-in has to be known good beforehand.
+  workflow_dispatch:
 
 jobs:
   release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write # the GitHub release
@@ -49,3 +55,39 @@ jobs:
         run: |
           for d in dist/npm/cli-*/; do (cd "$d" && npm publish --access public); done
           cd dist/npm/cli && npm publish --access public
+
+  npm-signin-check:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      # The same request npm publish makes first. Prints npm's answer per
+      # package, never a token (this log is public).
+      - name: Ask npm whether it accepts this workflow for each package
+        run: |
+          set -eu
+          idt=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
+          echo "$idt" | cut -d. -f2 | python3 -c 'import sys,base64,json; s=sys.stdin.read().strip(); c=json.loads(base64.urlsafe_b64decode(s+"="*(-len(s)%4))); print({k:c.get(k) for k in ("repository","repository_visibility","workflow_ref","job_workflow_ref","ref","event_name","environment","runner_environment")})'
+          fail=0
+          for p in cli cli-darwin-arm64 cli-darwin-x64 cli-linux-arm64 cli-linux-x64 cli-win32-arm64 cli-win32-x64; do
+            code=$(curl -sS -o resp.json -w '%{http_code}' -X POST -H "Authorization: Bearer $idt" -H 'Content-Type: application/json' --data '' "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/@sendio%2f$p")
+            if grep -q '"token"' resp.json; then echo "@sendio/$p: HTTP $code, npm accepts the sign-in"
+            else echo "@sendio/$p: HTTP $code $(head -c 400 resp.json)"; fail=1; fi
+            rm -f resp.json
+          done
+          exit $fail
+      - if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - if: always()
+        run: npm install -g npm@latest
+      - if: always()
+        name: The same through npm itself (dry run, nothing is uploaded)
+        run: |
+          for p in cli cli-darwin-arm64; do
+            d=$(mktemp -d); printf '{"name":"@sendio/%s","version":"0.0.0-signin-check"}\n' "$p" > "$d/package.json"
+            (cd "$d" && npm publish --dry-run --access public --tag signin-check --loglevel verbose 2>&1 | grep -E 'oidc|Publishing|npm error' || true)
+          done
