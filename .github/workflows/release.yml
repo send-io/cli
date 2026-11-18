@@ -63,31 +63,19 @@ jobs:
       id-token: write
     steps:
       # The same request npm publish makes first. Prints npm's answer per
-      # package, never a token (this log is public).
+      # package, never a token (this log is public). npm answers "package not
+      # found" for every mismatch, whether the package is missing, has no
+      # trusted publisher, or trusts another repository or workflow file.
       - name: Ask npm whether it accepts this workflow for each package
         run: |
           set -eu
           idt=$(curl -sS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" | jq -r .value)
           echo "$idt" | cut -d. -f2 | python3 -c 'import sys,base64,json; s=sys.stdin.read().strip(); c=json.loads(base64.urlsafe_b64decode(s+"="*(-len(s)%4))); print({k:c.get(k) for k in ("repository","repository_visibility","workflow_ref","job_workflow_ref","ref","event_name","environment","runner_environment")})'
           fail=0
-          for p in '@sendio%2fcli' '@sendio%2Fcli' '@sendio/cli' 'n8n-nodes-sendio' '@sendio%2fnode' '@sendio%2fnope-does-not-exist-1118'; do
-            code=$(curl -sS -o resp.json -w '%{http_code}' -X POST -H "Authorization: Bearer $idt" -H 'Content-Type: application/json' --data '' "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$p")
-            if grep -q '"token"' resp.json; then echo "$p: HTTP $code, npm accepts the sign-in"
-            else echo "$p: HTTP $code $(head -c 400 resp.json)"; fail=1; fi
+          for p in cli cli-darwin-arm64 cli-darwin-x64 cli-linux-arm64 cli-linux-x64 cli-win32-arm64 cli-win32-x64; do
+            code=$(curl -sS -o resp.json -w '%{http_code}' -X POST -H "Authorization: Bearer $idt" -H 'Content-Type: application/json' --data '' "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/@sendio%2f$p")
+            if grep -q '"token"' resp.json; then echo "@sendio/$p: HTTP $code, npm accepts the sign-in"
+            else echo "@sendio/$p: HTTP $code $(head -c 400 resp.json)"; fail=1; fi
             rm -f resp.json
           done
           exit $fail
-      - if: always()
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-      - if: always()
-        run: npm install -g npm@latest
-      - if: always()
-        name: The same through npm itself (dry run, nothing is uploaded)
-        run: |
-          for p in cli cli-darwin-arm64; do
-            d=$(mktemp -d); printf '{"name":"@sendio/%s","version":"0.0.0-signin-check"}\n' "$p" > "$d/package.json"
-            (cd "$d" && npm publish --dry-run --access public --tag signin-check --loglevel verbose 2>&1 | grep -E 'oidc|Publishing|npm error' || true)
-          done
